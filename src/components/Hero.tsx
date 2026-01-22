@@ -1,18 +1,16 @@
 'use client';
 
-import { Zap, Shield, Clock, MapPin } from 'lucide-react';
+import { Zap, Shield, Clock, MapPin, Phone } from 'lucide-react';
 
-interface HeroProps {
-  onPresupuesto: () => void;
-  onCita: () => void;
-}
-
-export default function Hero({ onPresupuesto, onCita }: HeroProps) {
+export default function Hero() {
   const features = [
     { icon: Shield, text: 'Profesionales Matriculados' },
     { icon: Clock, text: 'Emergencias 24/7' },
     { icon: MapPin, text: 'Lujan a Capital Federal' },
   ];
+
+  const whatsappPresupuesto = 'https://wa.me/5491131449673?text=Hola!%20Me%20comunico%20desde%20la%20web%20de%20Enermax.%20Quisiera%20pedir%20un%20presupuesto.';
+  const whatsappVisita = 'https://wa.me/5491131449673?text=Hola!%20Me%20comunico%20desde%20la%20web%20de%20Enermax.%20Quisiera%20agendar%20una%20visita%20tecnica.';
 
   return (
     <section className="gradient-hero pt-24 pb-16 md:pt-32 md:pb-24">
@@ -40,16 +38,21 @@ export default function Hero({ onPresupuesto, onCita }: HeroProps) {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <a
-              href="#presupuesto"
+              href={whatsappPresupuesto}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-secondary-900 font-semibold px-8 py-4 rounded-lg transition-all electric-glow"
             >
               <Zap className="w-5 h-5" />
               Pedir Presupuesto Gratis
             </a>
             <a
-              href="#agendar"
+              href={whatsappVisita}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-secondary-700 hover:bg-secondary-600 text-white font-semibold px-8 py-4 rounded-lg transition-all border border-secondary-600"
             >
+              <Phone className="w-5 h-5" />
               Agendar Visita Tecnica
             </a>
           </div>

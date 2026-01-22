@@ -5,13 +5,13 @@ import Hero from '@/components/Hero';
 import Services from '@/components/Services';
 import About from '@/components/About';
 import Footer from '@/components/Footer';
-import ChatBot from '@/components/ChatBot';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 export default function Home() {
   return (
     <main className="min-h-screen">
       <Header />
-      <Hero onPresupuesto={() => {}} onCita={() => {}} />
+      <Hero />
       <Services />
       <About />
 
@@ -22,7 +22,7 @@ export default function Home() {
             Necesitas un Electricista?
           </h2>
           <p className="text-xl text-secondary-300 mb-8 max-w-2xl mx-auto">
-            Chatea con nuestro asistente para consultar precios, pedir presupuesto
+            Contactanos por WhatsApp o telefono para consultar precios, pedir presupuesto
             o agendar una visita tecnica. Respuesta inmediata.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -51,7 +51,7 @@ export default function Home() {
       </section>
 
       <Footer />
-      <ChatBot />
+      <WhatsAppButton />
     </main>
   );
 }

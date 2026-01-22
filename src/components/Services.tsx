@@ -103,10 +103,12 @@ export default function Services() {
 
         <div className="text-center mt-12">
           <a
-            href="#presupuesto"
+            href="https://wa.me/5491131449673?text=Hola!%20Me%20comunico%20desde%20la%20web%20de%20Enermax.%20Quisiera%20consultar%20sobre%20sus%20servicios."
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold"
           >
-            Ver todos los servicios y pedir presupuesto
+            Consultar por WhatsApp
             <span className="text-xl">→</span>
           </a>
         </div>
