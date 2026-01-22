@@ -38,13 +38,13 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#presupuesto" className="text-secondary-400 hover:text-primary-400 transition-colors text-sm">
-                  Presupuesto
-                </a>
-              </li>
-              <li>
-                <a href="#agendar" className="text-secondary-400 hover:text-primary-400 transition-colors text-sm">
-                  Agendar Visita
+                <a
+                  href="https://wa.me/5491131449673?text=Hola!%20Necesito%20un%20electricista."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-secondary-400 hover:text-primary-400 transition-colors text-sm"
+                >
+                  Contactar
                 </a>
               </li>
             </ul>

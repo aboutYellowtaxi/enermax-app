@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Zap, Phone } from 'lucide-react';
+import { Menu, X, Zap, Phone, MessageCircle } from 'lucide-react';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,8 +9,12 @@ export default function Header() {
   const navLinks = [
     { href: '#servicios', label: 'Servicios' },
     { href: '#nosotros', label: 'Nosotros' },
-    { href: '#contacto', label: 'Contacto' },
   ];
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsMenuOpen(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-secondary-900/95 backdrop-blur-sm border-b border-secondary-800">
@@ -37,12 +41,18 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Phone CTA */}
-          <div className="hidden md:flex items-center gap-2">
-            <Phone className="w-4 h-4 text-primary-400" />
-            <a href="tel:+5491131449673" className="text-white font-medium hover:text-primary-400 transition-colors">
-              11-3144-9673
+          {/* Desktop CTA */}
+          <div className="hidden md:flex items-center gap-4">
+            <a href="tel:+5491131449673" className="flex items-center gap-2 text-secondary-300 hover:text-primary-400 transition-colors">
+              <Phone className="w-4 h-4" />
+              <span className="text-sm">11-3144-9673</span>
             </a>
+            <button
+              onClick={scrollToTop}
+              className="bg-primary-500 hover:bg-primary-600 text-secondary-900 font-semibold px-4 py-2 rounded-lg transition-all text-sm"
+            >
+              Contactar
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -67,13 +77,30 @@ export default function Header() {
                 {link.label}
               </a>
             ))}
-            <a
-              href="tel:+5491131449673"
-              className="flex items-center gap-2 py-3 text-primary-400 font-medium"
+            <button
+              onClick={scrollToTop}
+              className="block w-full text-left py-3 text-primary-400 font-medium"
             >
-              <Phone className="w-4 h-4" />
-              11-3144-9673
-            </a>
+              Dejar mis datos
+            </button>
+            <div className="flex gap-3 pt-3 border-t border-secondary-800 mt-3">
+              <a
+                href="https://wa.me/5491131449673?text=Hola!%20Necesito%20un%20electricista."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-2 rounded-lg text-sm font-medium"
+              >
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
+              </a>
+              <a
+                href="tel:+5491131449673"
+                className="flex-1 flex items-center justify-center gap-2 bg-secondary-700 text-white py-2 rounded-lg text-sm font-medium"
+              >
+                <Phone className="w-4 h-4" />
+                Llamar
+              </a>
+            </div>
           </nav>
         )}
       </div>
