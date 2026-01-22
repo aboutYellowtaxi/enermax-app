@@ -42,8 +42,8 @@ export default function Header() {
           {/* Phone CTA */}
           <div className="hidden md:flex items-center gap-2">
             <Phone className="w-4 h-4 text-primary-400" />
-            <a href="tel:+5491100000000" className="text-white font-medium hover:text-primary-400 transition-colors">
-              Llamanos
+            <a href="tel:+5491131449673" className="text-white font-medium hover:text-primary-400 transition-colors">
+              11-3144-9673
             </a>
           </div>
 
@@ -70,11 +70,11 @@ export default function Header() {
               </a>
             ))}
             <a
-              href="tel:+5491100000000"
+              href="tel:+5491131449673"
               className="flex items-center gap-2 py-3 text-primary-400 font-medium"
             >
               <Phone className="w-4 h-4" />
-              Llamanos
+              11-3144-9673
             </a>
           </nav>
         )}

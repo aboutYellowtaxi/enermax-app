@@ -75,14 +75,14 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-primary-400 flex-shrink-0" />
-                <a href="tel:+5491100000000" className="text-secondary-400 hover:text-primary-400 text-sm transition-colors">
-                  11-0000-0000
+                <a href="tel:+5491131449673" className="text-secondary-400 hover:text-primary-400 text-sm transition-colors">
+                  11-3144-9673
                 </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-primary-400 flex-shrink-0" />
-                <a href="mailto:contacto@enermax.com.ar" className="text-secondary-400 hover:text-primary-400 text-sm transition-colors">
-                  contacto@enermax.com.ar
+                <a href="mailto:whopwill1@gmail.com" className="text-secondary-400 hover:text-primary-400 text-sm transition-colors">
+                  whopwill1@gmail.com
                 </a>
               </li>
               <li className="flex items-center gap-3">
