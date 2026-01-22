@@ -1,10 +1,10 @@
 'use client';
 
-import { MapPin, Award, Users, Clock } from 'lucide-react';
+import { MapPin, Award, Users, Clock, Wrench, Zap, Shield } from 'lucide-react';
 
 const stats = [
   { icon: Users, value: '+500', label: 'Clientes Satisfechos' },
-  { icon: Award, value: '+10', label: 'Anos de Experiencia' },
+  { icon: Award, value: '+6', label: 'Anos de Experiencia' },
   { icon: Clock, value: '24/7', label: 'Disponibilidad' },
   { icon: MapPin, value: '50km', label: 'Radio de Cobertura' },
 ];
@@ -15,11 +15,21 @@ const zonas = [
   'Lujan', 'Mercedes', 'Capital Federal'
 ];
 
+const competencias = [
+  'Instalaciones electricas',
+  'Tableros electricos',
+  'Soldadura SMAW y MIG',
+  'Lectura de planos',
+  'Mantenimiento industrial',
+  'Normas de seguridad'
+];
+
 export default function About() {
   return (
     <section id="nosotros" className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        {/* Seccion Principal */}
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
           {/* Content */}
           <div>
             <span className="text-primary-500 font-semibold text-sm uppercase tracking-wider">
@@ -29,14 +39,15 @@ export default function About() {
               Profesionales Electricos de Confianza
             </h2>
             <p className="text-secondary-600 mb-6">
-              En <strong>Enermax</strong> somos tecnicos electricos matriculados con mas de 10 anos
-              de experiencia en instalaciones residenciales y comerciales. Estamos basados en
-              <strong> Moreno</strong> y brindamos servicio en toda la Zona Oeste, desde Lujan
-              hasta Capital Federal.
+              En <strong>Enermax</strong> somos tecnicos electricistas con formacion en la
+              Escuela Tecnica N° 2 de Moreno y experiencia tanto en instalaciones domiciliarias
+              como en mantenimiento industrial. Estamos basados en <strong>Moreno</strong> y
+              brindamos servicio en toda la Zona Oeste, desde Lujan hasta Capital Federal.
             </p>
             <p className="text-secondary-600 mb-8">
-              Nos especializamos en soluciones electricas seguras y duraderas. Todos nuestros
-              trabajos cuentan con garantia escrita y utilizamos materiales de primera calidad.
+              Nos especializamos en soluciones electricas seguras y duraderas. Capacidad de
+              aprendizaje rapido, adaptacion y compromiso total con la calidad y seguridad
+              de cada trabajo.
             </p>
 
             {/* Trust Points */}
@@ -47,7 +58,7 @@ export default function About() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-secondary-700">Tecnicos matriculados y certificados</span>
+                <span className="text-secondary-700">Tecnico en Electricidad - E.E.T. N°2 Moreno</span>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -55,7 +66,7 @@ export default function About() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-secondary-700">Garantia escrita en todos los trabajos</span>
+                <span className="text-secondary-700">Experiencia en instalaciones domiciliarias e industriales</span>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -71,7 +82,7 @@ export default function About() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-secondary-700">Materiales de primera calidad</span>
+                <span className="text-secondary-700">Compromiso con calidad y normas de seguridad</span>
               </div>
             </div>
           </div>
@@ -105,6 +116,72 @@ export default function About() {
                   </span>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Experiencia y Competencias */}
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Experiencia */}
+          <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+            <h3 className="text-xl font-bold text-secondary-900 mb-6 flex items-center gap-3">
+              <Wrench className="w-6 h-6 text-primary-500" />
+              Experiencia Profesional
+            </h3>
+
+            <div className="space-y-6">
+              <div className="border-l-2 border-primary-500 pl-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap className="w-4 h-4 text-primary-500" />
+                  <span className="font-semibold text-secondary-900">Electricista Domiciliario</span>
+                </div>
+                <p className="text-sm text-secondary-500 mb-2">2024 - Presente</p>
+                <ul className="text-sm text-secondary-600 space-y-1">
+                  <li>Instalacion y mantenimiento de tableros electricos</li>
+                  <li>Cableado estructural y reparacion de fallas</li>
+                  <li>Instalacion de luminarias y sistemas de proteccion</li>
+                </ul>
+              </div>
+
+              <div className="border-l-2 border-secondary-300 pl-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Shield className="w-4 h-4 text-secondary-500" />
+                  <span className="font-semibold text-secondary-900">Tecnico en Mantenimiento Industrial</span>
+                </div>
+                <p className="text-sm text-secondary-500 mb-2">2018 - 2020</p>
+                <ul className="text-sm text-secondary-600 space-y-1">
+                  <li>Soldadura SMAW y MIG para reparaciones</li>
+                  <li>Mantenimiento de sistemas mecanicos</li>
+                  <li>Trabajo bajo normas de seguridad industrial</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Competencias */}
+          <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+            <h3 className="text-xl font-bold text-secondary-900 mb-6 flex items-center gap-3">
+              <Award className="w-6 h-6 text-primary-500" />
+              Competencias Tecnicas
+            </h3>
+
+            <div className="grid grid-cols-2 gap-3">
+              {competencias.map((comp, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 bg-gray-50 px-4 py-3 rounded-lg"
+                >
+                  <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
+                  <span className="text-sm text-secondary-700">{comp}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 p-4 bg-primary-50 rounded-lg border border-primary-100">
+              <p className="text-sm text-secondary-700">
+                <strong className="text-primary-600">Formacion:</strong> Tecnico en Electricidad /
+                Electromecanica - Escuela Secundaria Tecnica N° 2 de Moreno
+              </p>
             </div>
           </div>
         </div>
