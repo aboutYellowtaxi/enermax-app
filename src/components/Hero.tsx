@@ -71,8 +71,8 @@ export default function Hero() {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-secondary-900 mb-2">Recibimos tus datos!</h2>
-            <p className="text-secondary-600 mb-6">Te llamamos en breve para coordinar.</p>
+            <h2 className="text-2xl font-bold text-secondary-900 mb-2">Visita agendada!</h2>
+            <p className="text-secondary-600 mb-6">Te contactamos pronto para confirmar el horario.</p>
             <div className="flex flex-col gap-3">
               <a
                 href="https://wa.me/5491131449673?text=Hola!%20Acabo%20de%20dejar%20mis%20datos%20en%20la%20web."
@@ -115,7 +115,7 @@ export default function Hero() {
             </h1>
 
             <p className="text-xl text-secondary-300 mb-8">
-              Dejanos tus datos y <strong className="text-white">te llamamos en minutos</strong> para resolver tu problema electrico.
+              Dejanos tus datos y <strong className="text-white">coordinamos una visita</strong> para resolver tu problema electrico.
             </p>
 
             {/* Features */}
@@ -155,8 +155,8 @@ export default function Hero() {
           <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto">
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-2xl">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-secondary-900">Te llamamos gratis</h2>
-                <p className="text-secondary-500 text-sm mt-1">Completa tus datos y te contactamos</p>
+                <h2 className="text-2xl font-bold text-secondary-900">Agenda tu visita</h2>
+                <p className="text-secondary-500 text-sm mt-1">Completa tus datos y coordinamos</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -234,8 +234,8 @@ export default function Hero() {
                     </>
                   ) : (
                     <>
-                      <Phone className="w-5 h-5" />
-                      QUIERO QUE ME LLAMEN
+                      <Zap className="w-5 h-5" />
+                      AGENDAR VISITA
                     </>
                   )}
                 </button>
