@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, Loader2, User, MapPin, MessageCircle, Phone, CheckCircle } from 'lucide-react';
+import { X, Send, User, MessageCircle, Phone, CheckCircle, Calendar, ArrowRight, Shield } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -18,11 +18,14 @@ export default function ChatIA({ onClose }: ChatIAProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hola! Soy Leonel, tu tecnico de confianza. Contame que te esta pasando y te doy una solucion ahora mismo. Trabajo con electricidad, plomeria y construccion en toda Zona Oeste.'
+      content: 'Hola! Soy Leonel, tu tecnico de confianza. Contame que te esta pasando y te doy una solucion ahora mismo.'
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ nombre: '', telefono: '', zona: '', problema: '' });
+  const [formSubmitted, setFormSubmitted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -32,15 +35,15 @@ export default function ChatIA({ onClose }: ChatIAProps) {
 
   useEffect(() => {
     scrollToBottom();
-    inputRef.current?.focus();
-  }, [messages]);
+    if (!showForm) inputRef.current?.focus();
+  }, [messages, showForm]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  const sendMessage = async (messageToSend?: string) => {
+    const msg = messageToSend || input.trim();
+    if (!msg || isLoading) return;
 
-    const userMessage = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setMessages(prev => [...prev, { role: 'user', content: msg }]);
     setIsLoading(true);
 
     try {
@@ -48,7 +51,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: userMessage,
+          message: msg,
           history: messages.map(m => ({ role: m.role, content: m.content }))
         }),
       });
@@ -77,6 +80,34 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     }
   };
 
+  const handleQuickMessage = (msg: string) => {
+    if (msg === 'Quiero agendar una visita') {
+      setShowForm(true);
+    } else {
+      sendMessage(msg);
+    }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Enviar a WhatsApp con los datos
+    const text = encodeURIComponent(
+      `Hola Leonel! Quiero agendar una visita.\n\n` +
+      `Nombre: ${formData.nombre}\n` +
+      `Telefono: ${formData.telefono}\n` +
+      `Zona: ${formData.zona}\n` +
+      `Problema: ${formData.problema}`
+    );
+
+    setFormSubmitted(true);
+
+    // Abrir WhatsApp despues de un momento
+    setTimeout(() => {
+      window.open(`https://wa.me/5491131449673?text=${text}`, '_blank');
+    }, 1500);
+  };
+
   const openWhatsApp = () => {
     const lastMessages = messages.slice(-3).map(m =>
       `${m.role === 'user' ? 'Yo' : 'Leonel'}: ${m.content}`
@@ -88,12 +119,134 @@ export default function ChatIA({ onClose }: ChatIAProps) {
   const quickMessages = [
     'Tengo un problema electrico',
     'Necesito un plomero urgente',
-    'Quiero presupuesto para una obra',
+    'Quiero agendar una visita',
   ];
 
+  // Formulario de contacto
+  if (showForm) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+          {formSubmitted ? (
+            // Confirmacion
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-10 h-10 text-green-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Listo!</h2>
+              <p className="text-gray-600 mb-6">
+                Te estamos redirigiendo a WhatsApp para confirmar tu visita.
+              </p>
+              <p className="text-sm text-gray-500">
+                Si no se abre automaticamente, <a href={`https://wa.me/5491131449673`} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">hace click aca</a>.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Header */}
+              <div className="bg-gradient-to-r from-secondary-900 to-secondary-800 text-white p-5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-6 h-6 text-primary-400" />
+                  <h2 className="text-lg font-bold">Agendar visita</h2>
+                </div>
+                <button onClick={() => setShowForm(false)} className="p-2 hover:bg-secondary-700 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Trust badges */}
+              <div className="bg-green-50 px-4 py-3 flex items-center justify-center gap-4 border-b border-green-100">
+                <span className="flex items-center gap-1 text-sm text-green-700">
+                  <Shield className="w-4 h-4" />
+                  Sin compromiso
+                </span>
+                <span className="flex items-center gap-1 text-sm text-green-700">
+                  <CheckCircle className="w-4 h-4" />
+                  Presupuesto gratis
+                </span>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tu nombre *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.nombre}
+                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base"
+                    placeholder="Como te llamas?"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    WhatsApp *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={formData.telefono}
+                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base"
+                    placeholder="11-1234-5678"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Zona / Barrio *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.zona}
+                    onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base"
+                    placeholder="Ej: Moron, Ituzaingo, Moreno..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Que problema tenes? *
+                  </label>
+                  <textarea
+                    required
+                    value={formData.problema}
+                    onChange={(e) => setFormData({ ...formData, problema: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base resize-none"
+                    rows={3}
+                    placeholder="Contanos brevemente..."
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 text-lg shadow-lg hover:shadow-xl"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Coordinar por WhatsApp
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+
+                <p className="text-center text-xs text-gray-500">
+                  Te contactamos en menos de 5 minutos
+                </p>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Chat normal
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
-      {/* Chat Container - Mas grande en desktop */}
       <div className="w-full h-full md:h-[90vh] md:max-h-[800px] md:max-w-2xl lg:max-w-3xl md:rounded-3xl bg-white shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
 
         {/* Header */}
@@ -113,10 +266,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-secondary-700 rounded-full transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-secondary-700 rounded-full transition-colors">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -136,22 +286,17 @@ export default function ChatIA({ onClose }: ChatIAProps) {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-gray-50">
           {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
+            <div key={index} className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {message.role === 'assistant' && (
                 <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
                   <span className="text-secondary-900 font-bold">L</span>
                 </div>
               )}
-              <div
-                className={`max-w-[85%] md:max-w-[75%] p-4 rounded-2xl ${
-                  message.role === 'user'
-                    ? 'bg-secondary-900 text-white rounded-br-md'
-                    : 'bg-white text-secondary-800 rounded-bl-md shadow-md border border-gray-100'
-                }`}
-              >
+              <div className={`max-w-[85%] md:max-w-[75%] p-4 rounded-2xl ${
+                message.role === 'user'
+                  ? 'bg-secondary-900 text-white rounded-br-md'
+                  : 'bg-white text-secondary-800 rounded-bl-md shadow-md border border-gray-100'
+              }`}>
                 <p className="text-sm md:text-base whitespace-pre-wrap leading-relaxed">{message.content}</p>
               </div>
               {message.role === 'user' && (
@@ -179,15 +324,20 @@ export default function ChatIA({ onClose }: ChatIAProps) {
         </div>
 
         {/* Quick Messages - Solo si hay pocos mensajes */}
-        {messages.length < 3 && (
+        {messages.length < 4 && (
           <div className="px-4 py-3 bg-white border-t border-gray-100 flex-shrink-0">
-            <p className="text-xs text-gray-500 mb-2">Respuestas rapidas:</p>
+            <p className="text-xs text-gray-500 mb-2">Hace click para enviar:</p>
             <div className="flex flex-wrap gap-2">
               {quickMessages.map((msg, i) => (
                 <button
                   key={i}
-                  onClick={() => setInput(msg)}
-                  className="text-sm bg-gray-100 hover:bg-primary-100 text-gray-700 hover:text-primary-700 px-3 py-1.5 rounded-full transition-colors"
+                  onClick={() => handleQuickMessage(msg)}
+                  disabled={isLoading}
+                  className={`text-sm px-4 py-2 rounded-full transition-all font-medium ${
+                    msg === 'Quiero agendar una visita'
+                      ? 'bg-primary-500 hover:bg-primary-600 text-secondary-900 shadow-md'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  } disabled:opacity-50`}
                 >
                   {msg}
                 </button>
@@ -199,19 +349,19 @@ export default function ChatIA({ onClose }: ChatIAProps) {
         {/* Quick Actions */}
         <div className="p-3 md:p-4 bg-gray-100 border-t border-gray-200 flex gap-2 flex-shrink-0">
           <button
+            onClick={() => setShowForm(true)}
+            className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-secondary-900 text-sm font-bold px-4 py-3 rounded-full transition-all shadow-md"
+          >
+            <Calendar className="w-4 h-4" />
+            Agendar visita
+          </button>
+          <button
             onClick={openWhatsApp}
-            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2.5 rounded-full transition-all shadow-md"
+            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-3 rounded-full transition-all shadow-md"
           >
             <MessageCircle className="w-4 h-4" />
-            Seguir por WhatsApp
+            WhatsApp
           </button>
-          <a
-            href="tel:+5491131449673"
-            className="flex items-center gap-2 bg-white hover:bg-gray-50 text-secondary-700 text-sm font-medium px-4 py-2.5 rounded-full border border-gray-200 transition-all"
-          >
-            <Phone className="w-4 h-4" />
-            Llamar
-          </a>
         </div>
 
         {/* Input */}
@@ -228,7 +378,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
               disabled={isLoading}
             />
             <button
-              onClick={sendMessage}
+              onClick={() => sendMessage()}
               disabled={!input.trim() || isLoading}
               className="bg-primary-500 hover:bg-primary-600 disabled:bg-gray-200 text-secondary-900 disabled:text-gray-400 p-3 md:p-4 rounded-full transition-colors shadow-md hover:shadow-lg disabled:shadow-none"
             >
