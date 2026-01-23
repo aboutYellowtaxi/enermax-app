@@ -151,24 +151,23 @@ export default function AgendarPage() {
     setSubmitting(true);
 
     try {
-      // If logged in, create cita in database
-      if (usuario) {
-        const { data, error } = await supabase.from('citas').insert({
-          cliente_id: usuario.id,
-          profesional_id: profesionalId,
-          fecha: fechaPreferida,
-          hora_inicio: horaPreferida === 'manana' ? '09:00' : horaPreferida === 'tarde' ? '14:00' : '18:00',
-          hora_fin: horaPreferida === 'manana' ? '12:00' : horaPreferida === 'tarde' ? '18:00' : '21:00',
-          servicio,
-          descripcion: `${descripcion}\n\nContacto: ${nombre} - ${telefono}\nLocalidad: ${localidad}`,
-          estado: 'pendiente'
-        }).select().single();
+      // SIEMPRE crear cita - con o sin usuario logueado
+      // Esto permite que el profesional vea TODAS las solicitudes en su dashboard
+      const { data, error } = await supabase.from('citas').insert({
+        cliente_id: usuario?.id || null,
+        profesional_id: profesionalId,
+        fecha: fechaPreferida,
+        hora_inicio: horaPreferida === 'manana' ? '09:00' : horaPreferida === 'tarde' ? '14:00' : '18:00',
+        hora_fin: horaPreferida === 'manana' ? '12:00' : horaPreferida === 'tarde' ? '18:00' : '21:00',
+        servicio,
+        descripcion: `Contacto: ${nombre}\nTelefono: ${telefono}\nLocalidad: ${localidad}\n\n${descripcion}`,
+        estado: 'pendiente'
+      }).select().single();
 
-        if (error) throw error;
-        if (data) setCitaId(data.id);
-      }
+      if (error) throw error;
+      if (data) setCitaId(data.id);
 
-      // Also save as lead for backup
+      // Tambien guardar en leads_clientes como backup
       await supabase.from('leads_clientes').insert({
         nombre,
         telefono,
