@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageCircle, Phone, Briefcase, Zap } from 'lucide-react';
+import { MessageCircle, Phone, Briefcase, Zap, Clock, Shield, Star } from 'lucide-react';
 import ChatIA from './ChatIA';
 
 const serviciosRotativos = ['Electricista', 'Plomero', 'Contratista'];
@@ -40,22 +40,48 @@ export default function Hero() {
             </span>
           </h1>
 
-          {/* Subtitulo */}
-          <p className="text-xl sm:text-2xl text-secondary-300 mb-10 max-w-2xl mx-auto">
-            Conectate con un profesional de tu zona en minutos
+          {/* Subtitulo con urgencia */}
+          <p className="text-xl sm:text-2xl text-secondary-300 mb-4 max-w-2xl mx-auto">
+            Te solucionamos el problema <span className="text-primary-400 font-semibold">hoy mismo</span>
           </p>
 
-          {/* BOTON A - CTA Principal */}
-          <button
-            onClick={() => setShowChat(true)}
-            className="group relative inline-flex items-center justify-center gap-3 bg-primary-500 hover:bg-primary-400 text-secondary-900 font-bold text-xl sm:text-2xl px-10 sm:px-14 py-5 sm:py-6 rounded-2xl transition-all transform hover:scale-105 shadow-2xl hover:shadow-primary-500/50 mb-8"
-          >
-            <MessageCircle className="w-7 h-7 sm:w-8 sm:h-8" />
-            <span>Contactar ahora</span>
-            <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-              Online
+          {/* Trust badges */}
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-8 text-sm text-secondary-400">
+            <span className="flex items-center gap-1">
+              <Clock className="w-4 h-4 text-green-400" />
+              Respuesta inmediata
+            </span>
+            <span className="flex items-center gap-1">
+              <Shield className="w-4 h-4 text-blue-400" />
+              Garantia de trabajo
+            </span>
+            <span className="flex items-center gap-1">
+              <Star className="w-4 h-4 text-yellow-400" />
+              Profesionales verificados
+            </span>
+          </div>
+
+          {/* BOTON A - CTA Principal GRANDE */}
+          <div className="relative inline-block mb-6">
+            <button
+              onClick={() => setShowChat(true)}
+              className="group relative inline-flex items-center justify-center gap-3 bg-primary-500 hover:bg-primary-400 text-secondary-900 font-bold text-xl sm:text-2xl px-12 sm:px-16 py-6 sm:py-7 rounded-2xl transition-all transform hover:scale-105 shadow-2xl hover:shadow-primary-500/50 animate-pulse-slow"
+            >
+              <MessageCircle className="w-8 h-8 sm:w-9 sm:h-9" />
+              <span>Habla con un experto GRATIS</span>
+            </button>
+            {/* Badge Online */}
+            <div className="absolute -top-3 -right-3 bg-green-500 text-white text-sm font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-lg">
+              <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
+              <span className="w-2 h-2 bg-white rounded-full absolute"></span>
+              <span className="ml-2">Online</span>
             </div>
-          </button>
+          </div>
+
+          {/* Urgencia */}
+          <p className="text-secondary-400 text-sm mb-8">
+            Sin compromiso - Te decimos precio y disponibilidad al instante
+          </p>
 
           {/* Contacto alternativo */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-secondary-400 mb-16">
@@ -87,7 +113,7 @@ export default function Hero() {
                 <h2 className="text-xl sm:text-2xl font-bold text-white">Sos profesional?</h2>
               </div>
               <p className="text-secondary-300 mb-6">
-                Unite a nuestra red de tecnicos y recib trabajos en tu zona
+                Unite a nuestra red de tecnicos y recibi trabajos en tu zona
               </p>
               <a
                 href="#profesional"
