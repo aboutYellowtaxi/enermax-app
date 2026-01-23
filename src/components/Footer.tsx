@@ -18,8 +18,8 @@ export default function Footer() {
               <span className="text-xl font-bold">ENERMAX</span>
             </a>
             <p className="text-secondary-400 text-sm">
-              Servicios electricos profesionales en Zona Oeste.
-              Calidad, seguridad y garantia en cada trabajo.
+              Conectamos personas con profesionales verificados
+              en todo el pais. Electricidad, plomeria, gas y mas.
             </p>
           </div>
 
@@ -52,13 +52,13 @@ export default function Footer() {
 
           {/* Services */}
           <div>
-            <h4 className="font-semibold mb-4">Servicios</h4>
+            <h4 className="font-semibold mb-4">Profesionales</h4>
             <ul className="space-y-2">
-              <li className="text-secondary-400 text-sm">Instalaciones Electricas</li>
-              <li className="text-secondary-400 text-sm">Reparacion de Fallas</li>
-              <li className="text-secondary-400 text-sm">Tableros y Termicas</li>
-              <li className="text-secondary-400 text-sm">Iluminacion</li>
-              <li className="text-secondary-400 text-sm">Bombas y Piletas</li>
+              <li className="text-secondary-400 text-sm">Electricistas</li>
+              <li className="text-secondary-400 text-sm">Plomeros</li>
+              <li className="text-secondary-400 text-sm">Gasistas</li>
+              <li className="text-secondary-400 text-sm">Pintores</li>
+              <li className="text-secondary-400 text-sm">Contratistas</li>
             </ul>
           </div>
 
@@ -69,8 +69,8 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-primary-400 flex-shrink-0 mt-0.5" />
                 <span className="text-secondary-400 text-sm">
-                  Moreno, Buenos Aires<br />
-                  Cobertura: Lujan a CABA
+                  Argentina<br />
+                  Cobertura nacional
                 </span>
               </li>
               <li className="flex items-center gap-3">
@@ -81,8 +81,8 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-primary-400 flex-shrink-0" />
-                <a href="mailto:whopwill1@gmail.com" className="text-secondary-400 hover:text-primary-400 text-sm transition-colors">
-                  whopwill1@gmail.com
+                <a href="mailto:contacto@enermax.com.ar" className="text-secondary-400 hover:text-primary-400 text-sm transition-colors">
+                  contacto@enermax.com.ar
                 </a>
               </li>
               <li className="flex items-center gap-3">
@@ -101,7 +101,7 @@ export default function Footer() {
             &copy; {currentYear} Enermax. Todos los derechos reservados.
           </p>
           <p className="text-secondary-600 text-xs">
-            Tecnicos Electricistas Matriculados
+            Profesionales verificados en toda Argentina
           </p>
         </div>
       </div>

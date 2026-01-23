@@ -17,7 +17,10 @@ import {
   Shield,
   Zap,
   Wrench,
-  Droplets
+  Droplets,
+  Flame,
+  PaintBucket,
+  Wind
 } from 'lucide-react';
 
 const SUPABASE_URL = 'https://ptgkjfofknpueepscdrq.supabase.co';
@@ -49,7 +52,10 @@ const OFICIOS = [
   { id: 'todos', label: 'Todos', icon: Briefcase },
   { id: 'electricidad', label: 'Electricista', icon: Zap },
   { id: 'plomeria', label: 'Plomero', icon: Droplets },
+  { id: 'gasista', label: 'Gasista', icon: Flame },
+  { id: 'pintura', label: 'Pintor', icon: PaintBucket },
   { id: 'contratista', label: 'Contratista', icon: Wrench },
+  { id: 'aire', label: 'Aire Acond.', icon: Wind },
 ];
 
 function ProfesionalesContent() {

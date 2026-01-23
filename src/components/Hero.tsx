@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { MessageCircle, Phone, Briefcase, Zap, Clock, Shield, Star } from 'lucide-react';
 import ChatIA from './ChatIA';
 
-const serviciosRotativos = ['Electricista', 'Plomero', 'Contratista'];
+const serviciosRotativos = ['Electricista', 'Plomero', 'Gasista', 'Pintor', 'Contratista', 'Tecnico'];
 
 export default function Hero() {
   const [servicioActual, setServicioActual] = useState(0);

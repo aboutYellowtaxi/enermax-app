@@ -10,7 +10,11 @@ import {
   Droplets,
   Wrench,
   Briefcase,
-  Users
+  Users,
+  Flame,
+  PaintBucket,
+  Hammer,
+  Wind
 } from 'lucide-react';
 
 const SUPABASE_URL = 'https://ptgkjfofknpueepscdrq.supabase.co';
@@ -29,7 +33,11 @@ const getServicioIcon = (servicio: string) => {
   const s = servicio.toLowerCase();
   if (s.includes('electric')) return Zap;
   if (s.includes('plom')) return Droplets;
-  if (s.includes('contrat')) return Wrench;
+  if (s.includes('contrat') || s.includes('construc')) return Wrench;
+  if (s.includes('gas')) return Flame;
+  if (s.includes('pintu')) return PaintBucket;
+  if (s.includes('carpint') || s.includes('mueble')) return Hammer;
+  if (s.includes('aire') || s.includes('clima') || s.includes('refrig')) return Wind;
   return Briefcase;
 };
 
@@ -71,10 +79,10 @@ export default function Services() {
             Nuestros Profesionales
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 mt-2 mb-4">
-            Expertos en Zona Oeste
+            Expertos cerca tuyo
           </h2>
           <p className="text-secondary-600 max-w-2xl mx-auto">
-            Electricistas, plomeros y contratistas verificados listos para ayudarte.
+            Profesionales verificados en electricidad, plomeria, gas, pintura y mas.
             Todos con calificaciones reales de clientes.
           </p>
         </div>
@@ -83,24 +91,45 @@ export default function Services() {
         <div className="flex flex-wrap justify-center gap-3 mb-10">
           <Link
             href="/profesionales?oficio=electricidad"
-            className="flex items-center gap-2 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-700 px-5 py-3 rounded-full font-medium transition-all"
+            className="flex items-center gap-2 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-700 px-4 py-2 rounded-full font-medium transition-all text-sm"
           >
-            <Zap className="w-5 h-5" />
+            <Zap className="w-4 h-4" />
             Electricistas
           </Link>
           <Link
             href="/profesionales?oficio=plomeria"
-            className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 px-5 py-3 rounded-full font-medium transition-all"
+            className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 px-4 py-2 rounded-full font-medium transition-all text-sm"
           >
-            <Droplets className="w-5 h-5" />
+            <Droplets className="w-4 h-4" />
             Plomeros
           </Link>
           <Link
-            href="/profesionales?oficio=contratista"
-            className="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700 px-5 py-3 rounded-full font-medium transition-all"
+            href="/profesionales?oficio=gasista"
+            className="flex items-center gap-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 px-4 py-2 rounded-full font-medium transition-all text-sm"
           >
-            <Wrench className="w-5 h-5" />
+            <Flame className="w-4 h-4" />
+            Gasistas
+          </Link>
+          <Link
+            href="/profesionales?oficio=pintura"
+            className="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 px-4 py-2 rounded-full font-medium transition-all text-sm"
+          >
+            <PaintBucket className="w-4 h-4" />
+            Pintores
+          </Link>
+          <Link
+            href="/profesionales?oficio=contratista"
+            className="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700 px-4 py-2 rounded-full font-medium transition-all text-sm"
+          >
+            <Wrench className="w-4 h-4" />
             Contratistas
+          </Link>
+          <Link
+            href="/profesionales?oficio=aire"
+            className="flex items-center gap-2 bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 text-cyan-700 px-4 py-2 rounded-full font-medium transition-all text-sm"
+          >
+            <Wind className="w-4 h-4" />
+            Aire Acondicionado
           </Link>
         </div>
 

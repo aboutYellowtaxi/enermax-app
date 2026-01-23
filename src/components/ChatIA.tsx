@@ -66,6 +66,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
   const [profesionales, setProfesionales] = useState<Profesional[]>([]);
   const [showProfesionales, setShowProfesionales] = useState(false);
   const [zonaDetectada, setZonaDetectada] = useState('');
+  const [mostrandoCercanos, setMostrandoCercanos] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedProf, setSelectedProf] = useState<Profesional | null>(null);
   const [leadForm, setLeadForm] = useState({ nombre: '', telefono: '' });
@@ -94,6 +95,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
 
   const buscarProfesionales = async (zona: string) => {
     setLoading(true);
+    setMostrandoCercanos(false);
     try {
       const response = await fetch(
         `${SUPABASE_URL}/rest/v1/leads_profesionales?disponible=eq.true&select=*`,
@@ -111,7 +113,14 @@ export default function ChatIA({ onClose }: ChatIAProps) {
           p.zonas_cobertura?.some(z => z.toLowerCase() === zona.toLowerCase()) ||
           p.zona.toLowerCase() === zona.toLowerCase()
         );
-        setProfesionales(filtered);
+
+        // Si no hay profesionales en la zona exacta, mostrar todos los disponibles
+        if (filtered.length === 0 && data.length > 0) {
+          setProfesionales(data);
+          setMostrandoCercanos(true);
+        } else {
+          setProfesionales(filtered);
+        }
         setShowProfesionales(true);
         setZonaDetectada(zona);
       }
@@ -200,6 +209,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     setSelectedProf(null);
     setLeadSent(false);
     setLeadForm({ nombre: '', telefono: '' });
+    setMostrandoCercanos(false);
     setMessages(prev => [...prev, {
       role: 'assistant',
       content: '¿Necesitas buscar en otra zona? Decime cual.'
@@ -314,7 +324,9 @@ export default function ChatIA({ onClose }: ChatIAProps) {
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
-                <h3 className="font-bold text-lg">Profesionales en {zonaDetectada}</h3>
+                <h3 className="font-bold text-lg">
+                  {mostrandoCercanos ? `Profesionales cercanos a ${zonaDetectada}` : `Profesionales en ${zonaDetectada}`}
+                </h3>
                 <p className="text-sm text-secondary-300">{profesionales.length} disponibles</p>
               </div>
             </div>
@@ -323,10 +335,19 @@ export default function ChatIA({ onClose }: ChatIAProps) {
             </button>
           </div>
 
+          {mostrandoCercanos && (
+            <div className="bg-amber-50 border-b border-amber-100 px-4 py-3">
+              <p className="text-amber-800 text-sm text-center">
+                No encontramos profesionales en {zonaDetectada}, pero estos trabajan en zonas cercanas
+              </p>
+            </div>
+          )}
+
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
             {profesionales.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-500 mb-4">No hay profesionales disponibles en {zonaDetectada} por ahora.</p>
+                <p className="text-gray-500 mb-4">Todavia no tenemos profesionales en esta zona.</p>
+                <p className="text-gray-400 text-sm mb-4">Estamos expandiendo nuestra red constantemente.</p>
                 <button
                   onClick={volverAlChat}
                   className="bg-primary-500 text-secondary-900 font-semibold px-6 py-2 rounded-full"
