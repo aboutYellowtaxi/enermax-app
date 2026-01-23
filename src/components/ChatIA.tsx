@@ -29,9 +29,29 @@ const SUPABASE_URL = 'https://ptgkjfofknpueepscdrq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0Z2tqZm9ma25wdWVlcHNjZHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxMjU0MDAsImV4cCI6MjA4NDcwMTQwMH0.QrSmVihF3Srx3IOEzD9BCuFqdLFGXe2K9ulJ6NL5g2s';
 
 const ZONAS = [
-  'moreno', 'merlo', 'ituzaingo', 'moron', 'haedo', 'ramos mejia',
-  'castelar', 'san justo', 'la matanza', 'lujan', 'mercedes', 'capital',
-  'paso del rey', 'la reja', 'francisco alvarez'
+  // GBA Oeste
+  'moreno', 'merlo', 'ituzaingo', 'moron', 'haedo', 'ramos mejia', 'castelar',
+  'san justo', 'la matanza', 'hurlingham', 'tres de febrero', 'paso del rey',
+  'la reja', 'francisco alvarez', 'lujan', 'mercedes', 'general rodriguez',
+  // GBA Norte
+  'san isidro', 'vicente lopez', 'tigre', 'san fernando', 'pilar', 'escobar',
+  'san miguel', 'jose c. paz', 'malvinas argentinas', 'san martin',
+  // GBA Sur
+  'quilmes', 'lanus', 'avellaneda', 'lomas de zamora', 'florencio varela',
+  'berazategui', 'almirante brown', 'esteban echeverria', 'ezeiza',
+  // La Plata
+  'la plata', 'ensenada', 'berisso', 'city bell', 'gonnet',
+  // CABA
+  'capital federal', 'capital', 'caba', 'palermo', 'belgrano', 'recoleta',
+  'caballito', 'flores', 'villa urquiza', 'almagro', 'barracas', 'la boca', 'san telmo',
+  // Interior Buenos Aires
+  'mar del plata', 'bahia blanca', 'tandil', 'olavarria', 'necochea',
+  // Otras provincias
+  'cordoba', 'rosario', 'mendoza', 'tucuman', 'salta', 'santa fe',
+  'san juan', 'neuquen', 'bariloche', 'ushuaia', 'posadas', 'corrientes',
+  'resistencia', 'parana', 'formosa', 'san luis', 'la rioja', 'catamarca',
+  'santiago del estero', 'jujuy', 'rio gallegos', 'rawson', 'viedma',
+  'santa rosa', 'comodoro rivadavia'
 ];
 
 export default function ChatIA({ onClose }: ChatIAProps) {
@@ -120,7 +140,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     } else {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'No reconozco esa zona. Decime de que localidad de Zona Oeste sos: Moreno, Merlo, Moron, Ituzaingo, Haedo, etc.'
+        content: 'No reconozco esa zona. Decime de que localidad sos: Capital, Palermo, Moreno, Quilmes, La Plata, Cordoba, Rosario, etc.'
       }]);
     }
   };
@@ -186,7 +206,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     }]);
   };
 
-  const zonasRapidas = ['Moreno', 'Moron', 'Ituzaingo', 'Merlo'];
+  const zonasRapidas = ['Capital', 'La Plata', 'Quilmes', 'Moreno'];
 
   // Form para captar datos antes de WhatsApp
   if (selectedProf) {

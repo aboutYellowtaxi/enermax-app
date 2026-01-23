@@ -37,8 +37,12 @@ interface Profesional {
 }
 
 const ZONAS = [
-  'Todas', 'Moreno', 'Merlo', 'Ituzaingo', 'Moron', 'Haedo', 'Ramos Mejia',
-  'Castelar', 'San Justo', 'La Matanza', 'Lujan', 'Mercedes', 'Capital Federal'
+  'Todas',
+  // GBA y CABA
+  'Capital Federal', 'La Plata', 'Quilmes', 'Lanus', 'Avellaneda', 'Lomas de Zamora',
+  'Moreno', 'Merlo', 'Moron', 'Ituzaingo', 'La Matanza', 'San Isidro', 'Tigre', 'Pilar',
+  // Interior
+  'Cordoba', 'Rosario', 'Mendoza', 'Tucuman', 'Mar del Plata', 'Salta', 'Santa Fe'
 ];
 
 const OFICIOS = [

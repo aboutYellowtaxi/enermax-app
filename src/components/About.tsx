@@ -4,15 +4,14 @@ import { MapPin, Award, Users, Clock, Wrench, Zap, Shield } from 'lucide-react';
 
 const stats = [
   { icon: Users, value: '+500', label: 'Clientes Satisfechos' },
-  { icon: Award, value: '+6', label: 'Anos de Experiencia' },
+  { icon: Award, value: '+50', label: 'Profesionales Verificados' },
   { icon: Clock, value: '24/7', label: 'Disponibilidad' },
-  { icon: MapPin, value: '50km', label: 'Radio de Cobertura' },
+  { icon: MapPin, value: 'ARG', label: 'Cobertura Nacional' },
 ];
 
 const zonas = [
-  'Moreno', 'Merlo', 'Ituzaingo', 'Castelar', 'Moron',
-  'Haedo', 'Ramos Mejia', 'San Justo', 'La Matanza',
-  'Lujan', 'Mercedes', 'Capital Federal'
+  'Capital Federal', 'La Plata', 'Quilmes', 'Lanus', 'Moreno', 'Moron',
+  'Tigre', 'Pilar', 'Cordoba', 'Rosario', 'Mendoza', 'Mar del Plata'
 ];
 
 const competencias = [
@@ -39,10 +38,9 @@ export default function About() {
               Profesionales Electricos de Confianza
             </h2>
             <p className="text-secondary-600 mb-6">
-              En <strong>Enermax</strong> somos tecnicos electricistas con formacion en la
-              Escuela Tecnica N° 2 de Moreno y experiencia tanto en instalaciones domiciliarias
-              como en mantenimiento industrial. Estamos basados en <strong>Moreno</strong> y
-              brindamos servicio en toda la Zona Oeste, desde Lujan hasta Capital Federal.
+              En <strong>Enermax</strong> conectamos a personas con profesionales verificados
+              en electricidad, plomeria y servicios del hogar. Nuestra red de tecnicos con
+              experiencia cubre todo el pais, desde Buenos Aires hasta el interior de Argentina.
             </p>
             <p className="text-secondary-600 mb-8">
               Nos especializamos en soluciones electricas seguras y duraderas. Capacidad de

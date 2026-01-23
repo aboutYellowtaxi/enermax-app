@@ -4,9 +4,19 @@ import { useState } from 'react';
 import { Briefcase, CheckCircle, Loader2, Zap, MapPin, Wrench } from 'lucide-react';
 
 const zonas = [
-  'Moreno', 'Merlo', 'Ituzaingo', 'Castelar', 'Moron',
-  'Haedo', 'Ramos Mejia', 'San Justo', 'La Matanza',
-  'Lujan', 'Mercedes', 'Capital Federal', 'Otra zona'
+  // GBA Oeste
+  'Moreno', 'Merlo', 'Ituzaingo', 'Moron', 'Haedo', 'Ramos Mejia', 'Castelar',
+  'San Justo', 'La Matanza', 'Hurlingham', 'Tres de Febrero', 'Lujan', 'Mercedes',
+  // GBA Norte
+  'San Isidro', 'Vicente Lopez', 'Tigre', 'Pilar', 'Escobar', 'San Miguel',
+  // GBA Sur
+  'Quilmes', 'Lanus', 'Avellaneda', 'Lomas de Zamora', 'Berazategui', 'La Plata',
+  // CABA
+  'Capital Federal', 'Palermo', 'Belgrano', 'Recoleta', 'Caballito',
+  // Interior
+  'Cordoba', 'Rosario', 'Mendoza', 'Mar del Plata', 'Tucuman', 'Salta',
+  // Otra
+  'Otra zona'
 ];
 
 const serviciosDisponibles = [
