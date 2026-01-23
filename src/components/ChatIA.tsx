@@ -13,6 +13,7 @@ interface ChatIAProps {
 }
 
 const WEBHOOK_URL = 'https://n8n.srv1288767.hstgr.cloud/webhook/chat-leonel';
+const WEBHOOK_SECRET = 'enermax-secret-2024'; // Clave secreta para seguridad
 
 export default function ChatIA({ onClose }: ChatIAProps) {
   const [messages, setMessages] = useState<Message[]>([
@@ -38,9 +39,73 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     if (!showForm) inputRef.current?.focus();
   }, [messages, showForm]);
 
+  // Detectar si la IA pide datos o el usuario quiere dar datos
+  const shouldShowForm = (text: string): boolean => {
+    const triggers = [
+      'pasame tu nombre',
+      'pasame tus datos',
+      'nombre y telefono',
+      'nombre y tel',
+      'datos para contactarte',
+      'necesito tu nombre',
+      'decime tu nombre',
+      'tu telefono',
+      'tu numero',
+      'quiero dar mis datos',
+      'te paso mis datos',
+      'ahi te paso',
+      'te doy mis datos',
+      'paso mi numero',
+      'mi nombre es',
+      'me llamo'
+    ];
+    const lowerText = text.toLowerCase();
+    return triggers.some(trigger => lowerText.includes(trigger));
+  };
+
+  // Generar quick messages dinamicos basados en la conversacion
+  const getQuickMessages = (): string[] => {
+    if (messages.length <= 1) {
+      return [
+        'Tengo un problema electrico',
+        'Necesito un plomero urgente',
+        'Quiero presupuesto para una obra',
+      ];
+    }
+
+    const lastAssistant = messages.filter(m => m.role === 'assistant').slice(-1)[0];
+    if (lastAssistant) {
+      const text = lastAssistant.content.toLowerCase();
+
+      // Si pide datos o zona
+      if (text.includes('zona') || text.includes('donde') || text.includes('localidad')) {
+        return ['Moreno', 'Moron', 'Ituzaingo', 'Quiero dar mis datos'];
+      }
+
+      // Si habla de visita o presupuesto
+      if (text.includes('visita') || text.includes('presupuesto') || text.includes('revisar')) {
+        return ['Dale, cuando podes venir?', 'Cuanto sale la visita?', 'Quiero dar mis datos'];
+      }
+
+      // Si pregunta detalles del problema
+      if (text.includes('que te pasa') || text.includes('contame') || text.includes('detalles')) {
+        return ['Se corta la luz', 'Hay una perdida de agua', 'Necesito una instalacion nueva'];
+      }
+    }
+
+    // Default para conversacion avanzada
+    return ['Quiero dar mis datos', 'Cuanto sale?', 'Cuando podes venir?'];
+  };
+
   const sendMessage = async (messageToSend?: string) => {
     const msg = messageToSend || input.trim();
     if (!msg || isLoading) return;
+
+    // Si el usuario quiere dar datos, abrir form
+    if (shouldShowForm(msg)) {
+      setShowForm(true);
+      return;
+    }
 
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: msg }]);
@@ -49,7 +114,10 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     try {
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Webhook-Secret': WEBHOOK_SECRET // Header secreto
+        },
         body: JSON.stringify({
           message: msg,
           history: messages.map(m => ({ role: m.role, content: m.content }))
@@ -59,10 +127,17 @@ export default function ChatIA({ onClose }: ChatIAProps) {
       if (!response.ok) throw new Error('Error en la respuesta');
 
       const data = await response.json();
+      const aiResponse = data.response || 'Perdon, hubo un error. Escribime por WhatsApp al 11-3144-9673.';
+
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: data.response || 'Perdon, hubo un error. Escribime por WhatsApp al 11-3144-9673.'
+        content: aiResponse
       }]);
+
+      // Si la IA pide datos, mostrar form automaticamente
+      if (shouldShowForm(aiResponse)) {
+        setTimeout(() => setShowForm(true), 1500);
+      }
     } catch {
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -81,7 +156,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
   };
 
   const handleQuickMessage = (msg: string) => {
-    if (msg === 'Quiero agendar una visita') {
+    if (msg === 'Quiero dar mis datos') {
       setShowForm(true);
     } else {
       sendMessage(msg);
@@ -91,21 +166,25 @@ export default function ChatIA({ onClose }: ChatIAProps) {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Enviar a WhatsApp con los datos
     const text = encodeURIComponent(
       `Hola Leonel! Quiero agendar una visita.\n\n` +
       `Nombre: ${formData.nombre}\n` +
-      `Telefono: ${formData.telefono}\n` +
+      `Numero: ${formData.telefono}\n` +
       `Zona: ${formData.zona}\n` +
-      `Problema: ${formData.problema}`
+      (formData.problema ? `Problema: ${formData.problema}` : '')
     );
 
     setFormSubmitted(true);
 
-    // Abrir WhatsApp despues de un momento
     setTimeout(() => {
       window.open(`https://wa.me/5491131449673?text=${text}`, '_blank');
     }, 1500);
+  };
+
+  const closeFormSuccess = () => {
+    setFormSubmitted(false);
+    setShowForm(false);
+    onClose();
   };
 
   const openWhatsApp = () => {
@@ -116,20 +195,20 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     window.open(`https://wa.me/5491131449673?text=${text}`, '_blank');
   };
 
-  const quickMessages = [
-    'Tengo un problema electrico',
-    'Necesito un plomero urgente',
-    'Quiero agendar una visita',
-  ];
-
   // Formulario de contacto
   if (showForm) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
           {formSubmitted ? (
-            // Confirmacion
-            <div className="p-8 text-center">
+            // Confirmacion con boton cerrar
+            <div className="p-8 text-center relative">
+              <button
+                onClick={closeFormSuccess}
+                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="w-10 h-10 text-green-500" />
               </div>
@@ -137,9 +216,15 @@ export default function ChatIA({ onClose }: ChatIAProps) {
               <p className="text-gray-600 mb-6">
                 Te estamos redirigiendo a WhatsApp para confirmar tu visita.
               </p>
-              <p className="text-sm text-gray-500">
-                Si no se abre automaticamente, <a href={`https://wa.me/5491131449673`} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">hace click aca</a>.
+              <p className="text-sm text-gray-500 mb-6">
+                Si no se abre automaticamente, <a href="https://wa.me/5491131449673" target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">hace click aca</a>.
               </p>
+              <button
+                onClick={closeFormSuccess}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl transition-all"
+              >
+                Cerrar
+              </button>
             </div>
           ) : (
             <>
@@ -184,7 +269,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    WhatsApp *
+                    Numero *
                   </label>
                   <input
                     type="tel"
@@ -194,6 +279,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base"
                     placeholder="11-1234-5678"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Te contactaremos por WhatsApp</p>
                 </div>
 
                 <div>
@@ -212,14 +298,13 @@ export default function ChatIA({ onClose }: ChatIAProps) {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Que problema tenes? *
+                    Que problema tenes? <span className="text-gray-400 font-normal">(opcional)</span>
                   </label>
                   <textarea
-                    required
                     value={formData.problema}
                     onChange={(e) => setFormData({ ...formData, problema: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base resize-none"
-                    rows={3}
+                    rows={2}
                     placeholder="Contanos brevemente..."
                   />
                 </div>
@@ -243,6 +328,8 @@ export default function ChatIA({ onClose }: ChatIAProps) {
       </div>
     );
   }
+
+  const quickMessages = getQuickMessages();
 
   // Chat normal
   return (
@@ -323,10 +410,10 @@ export default function ChatIA({ onClose }: ChatIAProps) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick Messages - Solo si hay pocos mensajes */}
-        {messages.length < 4 && (
+        {/* Quick Messages - Dinamicos */}
+        {messages.length < 6 && (
           <div className="px-4 py-3 bg-white border-t border-gray-100 flex-shrink-0">
-            <p className="text-xs text-gray-500 mb-2">Hace click para enviar:</p>
+            <p className="text-xs text-gray-500 mb-2">Respuestas rapidas:</p>
             <div className="flex flex-wrap gap-2">
               {quickMessages.map((msg, i) => (
                 <button
@@ -334,7 +421,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
                   onClick={() => handleQuickMessage(msg)}
                   disabled={isLoading}
                   className={`text-sm px-4 py-2 rounded-full transition-all font-medium ${
-                    msg === 'Quiero agendar una visita'
+                    msg === 'Quiero dar mis datos'
                       ? 'bg-primary-500 hover:bg-primary-600 text-secondary-900 shadow-md'
                       : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                   } disabled:opacity-50`}

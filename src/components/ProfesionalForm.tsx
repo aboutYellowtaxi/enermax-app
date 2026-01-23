@@ -20,7 +20,7 @@ const serviciosDisponibles = [
 
 // Supabase config
 const SUPABASE_URL = 'https://ptgkjfofknpueepscdrq.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_PXMn1B3Mf9rXHdg0QMtdHg_4avInWmi';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0Z2tqZm9ma25wdWVlcHNjZHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxMjU0MDAsImV4cCI6MjA4NDcwMTQwMH0.QrSmVihF3Srx3IOEzD9BCuFqdLFGXe2K9ulJ6NL5g2s';
 
 export default function ProfesionalForm() {
   const [formData, setFormData] = useState({
