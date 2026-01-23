@@ -1,116 +1,185 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
+  Star,
+  MapPin,
+  ArrowRight,
   Zap,
-  Lightbulb,
-  Power,
-  Thermometer,
-  Waves,
-  Settings,
-  AlertTriangle,
-  Home
+  Droplets,
+  Wrench,
+  Briefcase,
+  Users
 } from 'lucide-react';
 
-const services = [
-  {
-    icon: AlertTriangle,
-    title: 'Solucion de Fallas Electricas',
-    description: 'Diagnostico y reparacion de cortes, cortocircuitos, fallas de aislacion y problemas electricos urgentes.',
-    price: 'Emergencias 24/7'
-  },
-  {
-    icon: Power,
-    title: 'Disyuntor y Termica',
-    description: 'Instalacion y reemplazo de disyuntores diferenciales y llaves termicas para proteger tu hogar.',
-    price: 'Desde $15.000'
-  },
-  {
-    icon: Zap,
-    title: 'Tomacorrientes',
-    description: 'Instalacion, reparacion y cambio de tomacorrientes simples, dobles y especiales.',
-    price: 'Desde $8.000'
-  },
-  {
-    icon: Lightbulb,
-    title: 'Luminarias Interior/Exterior',
-    description: 'Colocacion de luces LED, spots, plafones, apliques de pared y luminarias de jardin.',
-    price: 'Desde $12.000'
-  },
-  {
-    icon: Home,
-    title: 'Cableado Completo',
-    description: 'Tendido de cables para luces, tomacorrientes, bombas y equipos especiales.',
-    price: 'Presupuesto a medida'
-  },
-  {
-    icon: Waves,
-    title: 'Bombas y Piletas',
-    description: 'Instalacion de bombas de agua, luces de pileta y sistemas de filtracion.',
-    price: 'Desde $25.000'
-  },
-  {
-    icon: Settings,
-    title: 'Tableros Electricos',
-    description: 'Armado y mantenimiento de tableros principales y secundarios para bombas y equipos.',
-    price: 'Desde $35.000'
-  },
-  {
-    icon: Thermometer,
-    title: 'Puesta a Tierra',
-    description: 'Instalacion de jabalinas y sistemas de puesta a tierra reglamentarios.',
-    price: 'Desde $20.000'
-  },
-];
+const SUPABASE_URL = 'https://ptgkjfofknpueepscdrq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0Z2tqZm9ma25wdWVlcHNjZHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxMjU0MDAsImV4cCI6MjA4NDcwMTQwMH0.QrSmVihF3Srx3IOEzD9BCuFqdLFGXe2K9ulJ6NL5g2s';
+
+interface Profesional {
+  id: string;
+  nombre: string;
+  zona: string;
+  servicios: string[];
+  calificacion: number;
+  trabajos_completados: number;
+}
+
+const getServicioIcon = (servicio: string) => {
+  const s = servicio.toLowerCase();
+  if (s.includes('electric')) return Zap;
+  if (s.includes('plom')) return Droplets;
+  if (s.includes('contrat')) return Wrench;
+  return Briefcase;
+};
 
 export default function Services() {
+  const [profesionales, setProfesionales] = useState<Profesional[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProfesionales();
+  }, []);
+
+  const fetchProfesionales = async () => {
+    try {
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/leads_profesionales?disponible=eq.true&select=id,nombre,zona,servicios,calificacion,trabajos_completados&order=trabajos_completados.desc&limit=6`,
+        {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setProfesionales(data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section id="servicios" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <span className="text-primary-500 font-semibold text-sm uppercase tracking-wider">
-            Nuestros Servicios
+            Nuestros Profesionales
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 mt-2 mb-4">
-            Soluciones Electricas Completas
+            Expertos en Zona Oeste
           </h2>
           <p className="text-secondary-600 max-w-2xl mx-auto">
-            Ofrecemos servicios electricos profesionales para hogares y comercios.
-            Todos nuestros trabajos incluyen garantia escrita.
+            Electricistas, plomeros y contratistas verificados listos para ayudarte.
+            Todos con calificaciones reales de clientes.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((service, index) => (
-            <div
-              key={index}
-              className="group bg-gray-50 hover:bg-secondary-900 rounded-xl p-6 transition-all duration-300 border border-gray-100 hover:border-secondary-800"
-            >
-              <div className="bg-primary-500/10 group-hover:bg-primary-500/20 w-14 h-14 rounded-lg flex items-center justify-center mb-4 transition-colors">
-                <service.icon className="w-7 h-7 text-primary-500" />
-              </div>
-              <h3 className="text-lg font-semibold text-secondary-900 group-hover:text-white mb-2 transition-colors">
-                {service.title}
-              </h3>
-              <p className="text-secondary-600 group-hover:text-secondary-400 text-sm mb-4 transition-colors">
-                {service.description}
-              </p>
-              <span className="text-primary-500 font-medium text-sm">
-                {service.price}
-              </span>
-            </div>
-          ))}
+        {/* Categorias */}
+        <div className="flex flex-wrap justify-center gap-3 mb-10">
+          <Link
+            href="/profesionales?oficio=electricidad"
+            className="flex items-center gap-2 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-700 px-5 py-3 rounded-full font-medium transition-all"
+          >
+            <Zap className="w-5 h-5" />
+            Electricistas
+          </Link>
+          <Link
+            href="/profesionales?oficio=plomeria"
+            className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 px-5 py-3 rounded-full font-medium transition-all"
+          >
+            <Droplets className="w-5 h-5" />
+            Plomeros
+          </Link>
+          <Link
+            href="/profesionales?oficio=contratista"
+            className="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700 px-5 py-3 rounded-full font-medium transition-all"
+          >
+            <Wrench className="w-5 h-5" />
+            Contratistas
+          </Link>
         </div>
 
+        {/* Grid de profesionales */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-gray-100 rounded-xl p-6 animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                <div className="h-8 bg-gray-200 rounded w-full"></div>
+              </div>
+            ))}
+          </div>
+        ) : profesionales.length === 0 ? (
+          <div className="text-center py-12 bg-gray-50 rounded-xl">
+            <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500">Pronto tendras profesionales disponibles</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {profesionales.map((prof) => {
+              const IconComponent = getServicioIcon(prof.servicios?.[0] || '');
+              return (
+                <Link
+                  key={prof.id}
+                  href="/profesionales"
+                  className="group bg-gray-50 hover:bg-secondary-900 rounded-xl p-6 transition-all duration-300 border border-gray-100 hover:border-secondary-800"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="bg-primary-500/10 group-hover:bg-primary-500/20 w-12 h-12 rounded-lg flex items-center justify-center transition-colors">
+                      <IconComponent className="w-6 h-6 text-primary-500" />
+                    </div>
+                    <div className="flex items-center gap-1 text-yellow-500">
+                      <Star className="w-4 h-4 fill-current" />
+                      <span className="font-bold text-secondary-900 group-hover:text-white transition-colors">
+                        {prof.calificacion}
+                      </span>
+                    </div>
+                  </div>
+
+                  <h3 className="text-lg font-semibold text-secondary-900 group-hover:text-white mb-1 transition-colors">
+                    {prof.nombre}
+                  </h3>
+
+                  <p className="text-secondary-500 group-hover:text-secondary-400 text-sm flex items-center gap-1 mb-3 transition-colors">
+                    <MapPin className="w-3 h-3" />
+                    {prof.zona}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {prof.servicios?.slice(0, 2).map((s, i) => (
+                      <span
+                        key={i}
+                        className="bg-primary-500/10 group-hover:bg-primary-500/20 text-primary-600 group-hover:text-primary-400 text-xs px-2 py-0.5 rounded-full capitalize transition-colors"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="text-secondary-500 group-hover:text-secondary-400 text-sm transition-colors">
+                    {prof.trabajos_completados} trabajos completados
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
+        {/* CTA */}
         <div className="text-center mt-12">
-          <a
-            href="https://wa.me/5491131449673?text=Hola!%20Me%20comunico%20desde%20la%20web%20de%20Enermax.%20Quisiera%20consultar%20sobre%20sus%20servicios."
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold"
+          <Link
+            href="/profesionales"
+            className="inline-flex items-center gap-2 bg-secondary-900 hover:bg-secondary-800 text-white font-semibold px-8 py-4 rounded-full transition-all shadow-lg hover:shadow-xl"
           >
-            Consultar por WhatsApp
-            <span className="text-xl">→</span>
-          </a>
+            Ver todos los profesionales
+            <ArrowRight className="w-5 h-5" />
+          </Link>
         </div>
       </div>
     </section>

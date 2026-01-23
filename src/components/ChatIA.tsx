@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, User, MessageCircle, Phone, CheckCircle, Star, MapPin, Briefcase, ArrowLeft } from 'lucide-react';
+import { X, Send, User, MessageCircle, Star, MapPin, Briefcase, ArrowLeft, CheckCircle, Shield } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -27,18 +27,10 @@ interface ChatIAProps {
 const SUPABASE_URL = 'https://ptgkjfofknpueepscdrq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0Z2tqZm9ma25wdWVlcHNjZHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxMjU0MDAsImV4cCI6MjA4NDcwMTQwMH0.QrSmVihF3Srx3IOEzD9BCuFqdLFGXe2K9ulJ6NL5g2s';
 
-// Zonas que reconocemos
 const ZONAS = [
   'moreno', 'merlo', 'ituzaingo', 'moron', 'haedo', 'ramos mejia',
   'castelar', 'san justo', 'la matanza', 'lujan', 'mercedes', 'capital',
   'paso del rey', 'la reja', 'francisco alvarez'
-];
-
-// Fotos placeholder para profesionales
-const FOTOS_PLACEHOLDER = [
-  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
 ];
 
 export default function ChatIA({ onClose }: ChatIAProps) {
@@ -53,6 +45,9 @@ export default function ChatIA({ onClose }: ChatIAProps) {
   const [showProfesionales, setShowProfesionales] = useState(false);
   const [zonaDetectada, setZonaDetectada] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedProf, setSelectedProf] = useState<Profesional | null>(null);
+  const [leadForm, setLeadForm] = useState({ nombre: '', telefono: '' });
+  const [leadSent, setLeadSent] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -65,7 +60,6 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     inputRef.current?.focus();
   }, [messages, profesionales]);
 
-  // Detectar zona en el mensaje
   const detectarZona = (texto: string): string | null => {
     const textoLower = texto.toLowerCase();
     for (const zona of ZONAS) {
@@ -76,7 +70,6 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     return null;
   };
 
-  // Buscar profesionales en Supabase
   const buscarProfesionales = async (zona: string) => {
     setLoading(true);
     try {
@@ -92,7 +85,6 @@ export default function ChatIA({ onClose }: ChatIAProps) {
 
       if (response.ok) {
         const data = await response.json();
-        // Filtrar por zona en zonas_cobertura
         const filtered = data.filter((p: Profesional) =>
           p.zonas_cobertura?.some(z => z.toLowerCase() === zona.toLowerCase()) ||
           p.zona.toLowerCase() === zona.toLowerCase()
@@ -115,7 +107,6 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: msg }]);
 
-    // Detectar zona
     const zona = detectarZona(msg);
 
     if (zona) {
@@ -125,7 +116,6 @@ export default function ChatIA({ onClose }: ChatIAProps) {
       }]);
       await buscarProfesionales(zona);
     } else {
-      // Si no detecta zona, pedir zona
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: 'No reconozco esa zona. Decime de que localidad de Zona Oeste sos: Moreno, Merlo, Moron, Ituzaingo, Haedo, etc.'
@@ -140,16 +130,54 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     }
   };
 
-  const contactarProfesional = (prof: Profesional) => {
-    const text = encodeURIComponent(
-      `Hola ${prof.nombre}! Vi tu perfil en Enermax y necesito un servicio en ${zonaDetectada}. ¿Podemos coordinar?`
-    );
-    window.open(`https://wa.me/${prof.telefono}?text=${text}`, '_blank');
+  const handleContactar = (prof: Profesional) => {
+    setSelectedProf(prof);
+  };
+
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProf) return;
+
+    // Guardar lead en Supabase
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/leads_clientes`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          nombre: leadForm.nombre,
+          telefono: leadForm.telefono,
+          zona: zonaDetectada,
+          servicio_requerido: selectedProf.servicios?.[0] || 'general',
+          descripcion: `Contacto con ${selectedProf.nombre}`,
+          estado: 'nuevo'
+        })
+      });
+    } catch (error) {
+      console.error('Error guardando lead:', error);
+    }
+
+    setLeadSent(true);
+
+    // Abrir WhatsApp despues de un momento
+    setTimeout(() => {
+      const text = encodeURIComponent(
+        `Hola ${selectedProf.nombre}! Soy ${leadForm.nombre}, vi tu perfil en Enermax.\n\nNecesito un servicio en ${zonaDetectada}. Mi numero es ${leadForm.telefono}. ¿Podemos coordinar?`
+      );
+      window.open(`https://wa.me/${selectedProf.telefono}?text=${text}`, '_blank');
+    }, 1500);
   };
 
   const volverAlChat = () => {
     setShowProfesionales(false);
     setProfesionales([]);
+    setSelectedProf(null);
+    setLeadSent(false);
+    setLeadForm({ nombre: '', telefono: '' });
     setMessages(prev => [...prev, {
       role: 'assistant',
       content: '¿Necesitas buscar en otra zona? Decime cual.'
@@ -158,13 +186,106 @@ export default function ChatIA({ onClose }: ChatIAProps) {
 
   const zonasRapidas = ['Moreno', 'Moron', 'Ituzaingo', 'Merlo'];
 
+  // Form para captar datos antes de WhatsApp
+  if (selectedProf) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
+          {leadSent ? (
+            <div className="p-8 text-center">
+              <button
+                onClick={() => { setSelectedProf(null); setLeadSent(false); }}
+                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-10 h-10 text-green-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Listo!</h2>
+              <p className="text-gray-600 mb-6">
+                Te estamos conectando con {selectedProf.nombre} por WhatsApp.
+              </p>
+              <button
+                onClick={volverAlChat}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl"
+              >
+                Buscar otro profesional
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="bg-gradient-to-r from-secondary-900 to-secondary-800 text-white p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => setSelectedProf(null)} className="p-1 hover:bg-secondary-700 rounded-full">
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <h2 className="font-bold">Contactar a {selectedProf.nombre}</h2>
+                  </div>
+                  <button onClick={onClose} className="p-1 hover:bg-secondary-700 rounded-full">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-green-50 px-4 py-3 flex items-center justify-center gap-4 border-b border-green-100">
+                <span className="flex items-center gap-1 text-sm text-green-700">
+                  <Shield className="w-4 h-4" />
+                  Tus datos estan seguros
+                </span>
+              </div>
+
+              <form onSubmit={handleLeadSubmit} className="p-6 space-y-4">
+                <p className="text-gray-600 text-sm mb-4">
+                  Dejanos tus datos para que {selectedProf.nombre} pueda contactarte:
+                </p>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tu nombre *</label>
+                  <input
+                    type="text"
+                    required
+                    value={leadForm.nombre}
+                    onChange={(e) => setLeadForm({ ...leadForm, nombre: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="Como te llamas?"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tu numero *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={leadForm.telefono}
+                    onChange={(e) => setLeadForm({ ...leadForm, telefono: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="11-1234-5678"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Contactar por WhatsApp
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // Vista de profesionales
   if (showProfesionales) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
         <div className="w-full h-full md:h-[90vh] md:max-h-[800px] md:max-w-2xl lg:max-w-3xl md:rounded-3xl bg-white shadow-2xl flex flex-col overflow-hidden">
 
-          {/* Header */}
           <div className="bg-gradient-to-r from-secondary-900 to-secondary-800 text-white p-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
               <button onClick={volverAlChat} className="p-2 hover:bg-secondary-700 rounded-full">
@@ -180,7 +301,6 @@ export default function ChatIA({ onClose }: ChatIAProps) {
             </button>
           </div>
 
-          {/* Profesionales List */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
             {profesionales.length === 0 ? (
               <div className="text-center py-8">
@@ -193,73 +313,54 @@ export default function ChatIA({ onClose }: ChatIAProps) {
                 </button>
               </div>
             ) : (
-              profesionales.map((prof, index) => (
-                <div key={prof.id} className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-                  <div className="p-4">
-                    <div className="flex items-start gap-4">
-                      {/* Foto */}
-                      <img
-                        src={FOTOS_PLACEHOLDER[index % FOTOS_PLACEHOLDER.length]}
-                        alt={prof.nombre}
-                        className="w-20 h-20 rounded-xl object-cover"
-                      />
-
-                      {/* Info */}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-bold text-lg text-gray-900">{prof.nombre}</h3>
-                            <p className="text-sm text-gray-500 flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {prof.zona}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="flex items-center gap-1 text-yellow-500">
-                              <Star className="w-4 h-4 fill-current" />
-                              <span className="font-bold">{prof.calificacion}</span>
-                            </div>
-                            <p className="text-xs text-gray-500">{prof.trabajos_completados} trabajos</p>
-                          </div>
-                        </div>
-
-                        {/* Servicios */}
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {prof.servicios?.map((s, i) => (
-                            <span key={i} className="bg-primary-100 text-primary-700 text-xs px-2 py-0.5 rounded-full capitalize">
-                              {s}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+              profesionales.map((prof) => (
+                <div key={prof.id} className="bg-white rounded-2xl shadow-md border border-gray-100 p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-bold text-lg text-gray-900">{prof.nombre}</h3>
+                      <p className="text-sm text-gray-500 flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {prof.zona}
+                      </p>
                     </div>
-
-                    {/* Bio */}
-                    <p className="text-sm text-gray-600 mt-3 line-clamp-2">{prof.bio}</p>
-
-                    {/* Zonas que cubre */}
-                    <p className="text-xs text-gray-400 mt-2">
-                      Cubre: {prof.zonas_cobertura?.slice(0, 4).join(', ')}{prof.zonas_cobertura?.length > 4 ? '...' : ''}
-                    </p>
-
-                    {/* Action */}
-                    <button
-                      onClick={() => contactarProfesional(prof)}
-                      className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                      Contactar por WhatsApp
-                    </button>
+                    <div className="text-right">
+                      <div className="flex items-center gap-1 text-yellow-500">
+                        <Star className="w-4 h-4 fill-current" />
+                        <span className="font-bold">{prof.calificacion}</span>
+                      </div>
+                      <p className="text-xs text-gray-500">{prof.trabajos_completados} trabajos</p>
+                    </div>
                   </div>
+
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {prof.servicios?.map((s, i) => (
+                      <span key={i} className="bg-primary-100 text-primary-700 text-xs px-2 py-0.5 rounded-full capitalize">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="text-sm text-gray-600 mb-2">{prof.bio}</p>
+
+                  <p className="text-xs text-gray-400 mb-4">
+                    Cubre: {prof.zonas_cobertura?.slice(0, 4).join(', ')}{prof.zonas_cobertura?.length > 4 ? '...' : ''}
+                  </p>
+
+                  <button
+                    onClick={() => handleContactar(prof)}
+                    className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    Contactar
+                  </button>
                 </div>
               ))
             )}
           </div>
 
-          {/* Footer */}
           <div className="p-4 bg-white border-t flex-shrink-0">
             <p className="text-center text-xs text-gray-500">
-              Contacta directo al profesional y arreglen el precio entre ustedes
+              Arregla el precio directo con el profesional
             </p>
           </div>
         </div>
@@ -272,7 +373,6 @@ export default function ChatIA({ onClose }: ChatIAProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
       <div className="w-full h-full md:h-[90vh] md:max-h-[800px] md:max-w-2xl lg:max-w-3xl md:rounded-3xl bg-white shadow-2xl flex flex-col overflow-hidden">
 
-        {/* Header */}
         <div className="bg-gradient-to-r from-secondary-900 to-secondary-800 text-white p-4 md:p-5 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
@@ -288,7 +388,6 @@ export default function ChatIA({ onClose }: ChatIAProps) {
           </button>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-gray-50">
           {messages.map((message, index) => (
             <div key={index} className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -328,7 +427,6 @@ export default function ChatIA({ onClose }: ChatIAProps) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Zonas rapidas */}
         {messages.length <= 2 && (
           <div className="px-4 py-3 bg-white border-t border-gray-100 flex-shrink-0">
             <p className="text-xs text-gray-500 mb-2">Selecciona tu zona:</p>
@@ -351,7 +449,6 @@ export default function ChatIA({ onClose }: ChatIAProps) {
           </div>
         )}
 
-        {/* Input */}
         <div className="p-4 md:p-5 bg-white border-t border-gray-100 flex-shrink-0">
           <div className="flex gap-3">
             <input
