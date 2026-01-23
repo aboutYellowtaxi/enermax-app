@@ -1,5 +1,6 @@
 'use client';
 
+// Pagina de profesionales con filtros
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
