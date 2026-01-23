@@ -12,7 +12,7 @@ interface ChatIAProps {
   onClose: () => void;
 }
 
-const WEBHOOK_URL = 'https://n8n.srv1288767.hstgr.cloud/webhook/enermax-chat-ia';
+const WEBHOOK_URL = 'https://n8n.srv1288767.hstgr.cloud/webhook/chat-leonel';
 
 export default function ChatIA({ onClose }: ChatIAProps) {
   const [messages, setMessages] = useState<Message[]>([
