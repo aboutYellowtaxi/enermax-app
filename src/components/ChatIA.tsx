@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, User, MessageCircle, Star, MapPin, Briefcase, ArrowLeft, CheckCircle, Shield } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { X, Send, User, MessageCircle, Star, MapPin, Briefcase, ArrowLeft, CheckCircle, Shield, Calendar, Phone } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -34,6 +35,7 @@ const ZONAS = [
 ];
 
 export default function ChatIA({ onClose }: ChatIAProps) {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -346,13 +348,25 @@ export default function ChatIA({ onClose }: ChatIAProps) {
                     Cubre: {prof.zonas_cobertura?.slice(0, 4).join(', ')}{prof.zonas_cobertura?.length > 4 ? '...' : ''}
                   </p>
 
-                  <button
-                    onClick={() => handleContactar(prof)}
-                    className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                    Contactar
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handleContactar(prof)}
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl flex items-center justify-center gap-2 text-sm"
+                    >
+                      <Phone className="w-4 h-4" />
+                      Urgente
+                    </button>
+                    <button
+                      onClick={() => {
+                        onClose();
+                        router.push(`/agendar/${prof.id}`);
+                      }}
+                      className="bg-primary-500 hover:bg-primary-600 text-secondary-900 font-semibold py-3 rounded-xl flex items-center justify-center gap-2 text-sm"
+                    >
+                      <Calendar className="w-4 h-4" />
+                      Agendar cita
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -360,7 +374,7 @@ export default function ChatIA({ onClose }: ChatIAProps) {
 
           <div className="p-4 bg-white border-t flex-shrink-0">
             <p className="text-center text-xs text-gray-500">
-              Arregla el precio directo con el profesional
+              <span className="font-medium">Urgente:</span> WhatsApp directo | <span className="font-medium">Agendar:</span> Reserva con fecha y hora
             </p>
           </div>
         </div>
