@@ -166,6 +166,28 @@ export default function ChatIA({ onClose }: ChatIAProps) {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Enviar a n8n para guardar en Supabase y hacer matching
+    try {
+      await fetch('https://n8n.srv1288767.hstgr.cloud/webhook/lead-cliente', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Webhook-Secret': WEBHOOK_SECRET
+        },
+        body: JSON.stringify({
+          nombre: formData.nombre,
+          telefono: formData.telefono,
+          zona: formData.zona,
+          problema: formData.problema || '',
+          servicio: 'general', // Por ahora general, luego podemos agregar selector
+          fuente: 'chat-web'
+        })
+      });
+    } catch (error) {
+      console.error('Error enviando lead:', error);
+    }
+
+    // Tambien abrir WhatsApp para contacto directo
     const text = encodeURIComponent(
       `Hola Leonel! Quiero agendar una visita.\n\n` +
       `Nombre: ${formData.nombre}\n` +
