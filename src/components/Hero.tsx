@@ -1,272 +1,108 @@
 'use client';
 
-import { useState } from 'react';
-import { Zap, Shield, Clock, MapPin, Phone, MessageCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MessageCircle, Phone, Briefcase, Zap } from 'lucide-react';
+import ChatIA from './ChatIA';
 
-const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfFEk6e7bo72CuQkKc84tFtYyr_CMTqXRBe43xnOsZpecoRiQ/formResponse';
-
-const zonas = [
-  'Moreno', 'Merlo', 'Ituzaingo', 'Castelar', 'Moron',
-  'Haedo', 'Ramos Mejia', 'San Justo', 'La Matanza',
-  'Lujan', 'Mercedes', 'Capital Federal', 'Otra zona'
-];
-
-const servicios = [
-  'Falla electrica / Emergencia',
-  'Instalacion de termica/disyuntor',
-  'Tomacorrientes',
-  'Iluminacion',
-  'Cableado',
-  'Tablero electrico',
-  'Bomba / Pileta',
-  'Otro servicio'
-];
+const serviciosRotativos = ['Electricista', 'Plomero', 'Contratista'];
 
 export default function Hero() {
-  const [formData, setFormData] = useState({
-    nombre: '',
-    telefono: '',
-    zona: '',
-    servicio: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [servicioActual, setServicioActual] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  // Rotacion de palabras
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setServicioActual((prev) => (prev + 1) % serviciosRotativos.length);
+        setIsAnimating(false);
+      }, 300);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
-    const formBody = new URLSearchParams();
-    formBody.append('entry.1135063153', formData.nombre);
-    formBody.append('entry.1644906803', formData.telefono);
-    formBody.append('entry.823661994', formData.zona);
-    formBody.append('entry.1034138782', formData.servicio);
+  return (
+    <>
+      <section className="gradient-hero min-h-screen flex items-center justify-center pt-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Main Heading con texto rotativo */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+            Necesitas un
+            <br />
+            <span
+              className={`inline-block text-primary-400 transition-all duration-300 ${
+                isAnimating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
+              }`}
+            >
+              {serviciosRotativos[servicioActual]}?
+            </span>
+          </h1>
 
-    try {
-      await fetch(GOOGLE_FORM_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formBody.toString()
-      });
-      setIsSubmitted(true);
-    } catch {
-      setIsSubmitted(true);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+          {/* Subtitulo */}
+          <p className="text-xl sm:text-2xl text-secondary-300 mb-10 max-w-2xl mx-auto">
+            Conectate con un profesional de tu zona en minutos
+          </p>
 
-  const features = [
-    { icon: Shield, text: 'Tecnicos Matriculados' },
-    { icon: Clock, text: 'Respuesta Rapida' },
-    { icon: MapPin, text: 'Lujan a Capital Federal' },
-  ];
-
-  if (isSubmitted) {
-    return (
-      <section className="gradient-hero pt-24 pb-16 md:pt-32 md:pb-24 min-h-[80vh] flex items-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="max-w-md mx-auto bg-white rounded-2xl p-8 shadow-2xl text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+          {/* BOTON A - CTA Principal */}
+          <button
+            onClick={() => setShowChat(true)}
+            className="group relative inline-flex items-center justify-center gap-3 bg-primary-500 hover:bg-primary-400 text-secondary-900 font-bold text-xl sm:text-2xl px-10 sm:px-14 py-5 sm:py-6 rounded-2xl transition-all transform hover:scale-105 shadow-2xl hover:shadow-primary-500/50 mb-8"
+          >
+            <MessageCircle className="w-7 h-7 sm:w-8 sm:h-8" />
+            <span>Contactar ahora</span>
+            <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+              Online
             </div>
-            <h2 className="text-2xl font-bold text-secondary-900 mb-2">Visita agendada!</h2>
-            <p className="text-secondary-600 mb-6">Te contactamos pronto para confirmar el horario.</p>
-            <div className="flex flex-col gap-3">
+          </button>
+
+          {/* Contacto alternativo */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-secondary-400 mb-16">
+            <a
+              href="https://wa.me/5491131449673?text=Hola!%20Necesito%20un%20profesional."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-green-400 transition-colors"
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span>WhatsApp directo</span>
+            </a>
+            <span className="hidden sm:block">|</span>
+            <a
+              href="tel:+5491131449673"
+              className="flex items-center gap-2 hover:text-primary-400 transition-colors"
+            >
+              <Phone className="w-5 h-5" />
+              <span>11-3144-9673</span>
+            </a>
+          </div>
+
+          {/* Separador */}
+          <div className="border-t border-secondary-700 pt-10">
+            {/* Seccion Sos Profesional */}
+            <div className="bg-secondary-800/50 backdrop-blur-sm rounded-2xl p-6 sm:p-8 max-w-xl mx-auto border border-secondary-700">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Briefcase className="w-6 h-6 text-primary-400" />
+                <h2 className="text-xl sm:text-2xl font-bold text-white">Sos profesional?</h2>
+              </div>
+              <p className="text-secondary-300 mb-6">
+                Unite a nuestra red de tecnicos y recib trabajos en tu zona
+              </p>
               <a
-                href="https://wa.me/5491131449673?text=Hola!%20Acabo%20de%20dejar%20mis%20datos%20en%20la%20web."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg transition-all"
+                href="#profesional"
+                className="inline-flex items-center justify-center gap-2 bg-secondary-700 hover:bg-secondary-600 text-white font-semibold px-8 py-3 rounded-xl transition-all border border-secondary-600"
               >
-                <MessageCircle className="w-5 h-5" />
-                Escribinos por WhatsApp
-              </a>
-              <a
-                href="tel:+5491131449673"
-                className="inline-flex items-center justify-center gap-2 text-secondary-600 hover:text-secondary-900 font-medium"
-              >
-                <Phone className="w-4 h-4" />
-                o llama al 11-3144-9673
+                <Zap className="w-5 h-5 text-primary-400" />
+                Quiero trabajar con Enermax
               </a>
             </div>
           </div>
         </div>
       </section>
-    );
-  }
 
-  return (
-    <section className="gradient-hero pt-24 pb-16 md:pt-32 md:pb-24 min-h-[90vh] flex items-center">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left - Text */}
-          <div className="text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 bg-primary-500/20 border border-primary-500/30 rounded-full px-4 py-2 mb-6">
-              <Zap className="w-4 h-4 text-primary-400" />
-              <span className="text-primary-400 text-sm font-medium">Electricistas Zona Oeste</span>
-            </div>
-
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-              Necesitas un
-              <br />
-              <span className="text-primary-400">Electricista?</span>
-            </h1>
-
-            <p className="text-xl text-secondary-300 mb-8">
-              Dejanos tus datos y <strong className="text-white">coordinamos una visita</strong> para resolver tu problema electrico.
-            </p>
-
-            {/* Features */}
-            <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-8">
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2 bg-secondary-800/50 px-4 py-2 rounded-full">
-                  <feature.icon className="w-4 h-4 text-primary-400" />
-                  <span className="text-sm text-secondary-300">{feature.text}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Alternative Contact - Desktop */}
-            <div className="hidden lg:flex items-center gap-4 text-secondary-400">
-              <span>O contactanos directo:</span>
-              <a
-                href="https://wa.me/5491131449673?text=Hola!%20Necesito%20un%20electricista."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-              >
-                <MessageCircle className="w-5 h-5" />
-                WhatsApp
-              </a>
-              <span>|</span>
-              <a
-                href="tel:+5491131449673"
-                className="flex items-center gap-2 text-primary-400 hover:text-primary-300 transition-colors"
-              >
-                <Phone className="w-5 h-5" />
-                11-3144-9673
-              </a>
-            </div>
-          </div>
-
-          {/* Right - Form */}
-          <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto">
-            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-2xl">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-secondary-900">Agenda tu visita</h2>
-                <p className="text-secondary-500 text-sm mt-1">Completa tus datos y coordinamos</p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-secondary-700 mb-1">
-                    Tu nombre
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                    placeholder="Juan Perez"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-secondary-700 mb-1">
-                    Tu telefono
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={formData.telefono}
-                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                    placeholder="11-1234-5678"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-secondary-700 mb-1">
-                    Tu zona
-                  </label>
-                  <select
-                    required
-                    value={formData.zona}
-                    onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
-                  >
-                    <option value="">Selecciona tu zona</option>
-                    {zonas.map((zona) => (
-                      <option key={zona} value={zona}>{zona}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-secondary-700 mb-1">
-                    Que necesitas?
-                  </label>
-                  <select
-                    required
-                    value={formData.servicio}
-                    onChange={(e) => setFormData({ ...formData, servicio: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
-                  >
-                    <option value="">Selecciona un servicio</option>
-                    {servicios.map((servicio) => (
-                      <option key={servicio} value={servicio}>{servicio}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-primary-300 text-secondary-900 font-bold py-4 rounded-lg transition-all text-lg flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Enviando...
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="w-5 h-5" />
-                      AGENDAR VISITA
-                    </>
-                  )}
-                </button>
-              </form>
-
-              {/* Alternative Contact - Mobile */}
-              <div className="lg:hidden mt-6 pt-6 border-t border-gray-100">
-                <p className="text-center text-secondary-500 text-sm mb-3">O contactanos directo</p>
-                <div className="flex gap-3">
-                  <a
-                    href="https://wa.me/5491131449673?text=Hola!%20Necesito%20un%20electricista."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-all"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                    WhatsApp
-                  </a>
-                  <a
-                    href="tel:+5491131449673"
-                    className="flex-1 flex items-center justify-center gap-2 bg-secondary-100 hover:bg-secondary-200 text-secondary-900 font-semibold py-3 rounded-lg transition-all"
-                  >
-                    <Phone className="w-5 h-5" />
-                    Llamar
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+      {/* Chat Modal */}
+      {showChat && <ChatIA onClose={() => setShowChat(false)} />}
+    </>
   );
 }
