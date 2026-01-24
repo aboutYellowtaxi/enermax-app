@@ -432,13 +432,21 @@ function ProfesionalesContent() {
                   Cubre: {prof.zonas_cobertura?.slice(0, 3).join(', ')}{prof.zonas_cobertura?.length > 3 ? '...' : ''}
                 </p>
 
-                <button
-                  onClick={() => handleContactar(prof)}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  Contactar
-                </button>
+                <div className="flex gap-2">
+                  <Link
+                    href={`/profesional/${prof.id}`}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl flex items-center justify-center gap-2 text-sm"
+                  >
+                    Ver perfil
+                  </Link>
+                  <Link
+                    href={`/agendar/${prof.id}`}
+                    className="flex-1 bg-primary-500 hover:bg-primary-400 text-secondary-900 font-bold py-3 rounded-xl flex items-center justify-center gap-2 text-sm"
+                  >
+                    <Zap className="w-4 h-4" />
+                    Solicitar
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
