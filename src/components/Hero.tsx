@@ -1,15 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageCircle, Phone, Briefcase, Zap, Clock, Shield, Star } from 'lucide-react';
-import ChatIA from './ChatIA';
+import Link from 'next/link';
+import { MessageCircle, Phone, Briefcase, Zap, Clock, Shield, Star, ArrowRight } from 'lucide-react';
 
 const serviciosRotativos = ['Electricista', 'Plomero', 'Gasista', 'Pintor', 'Contratista', 'Tecnico'];
 
 export default function Hero() {
   const [servicioActual, setServicioActual] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [showChat, setShowChat] = useState(false);
 
   // Rotacion de palabras
   useEffect(() => {
@@ -63,18 +62,19 @@ export default function Hero() {
 
           {/* BOTON A - CTA Principal GRANDE */}
           <div className="relative inline-block mb-6">
-            <button
-              onClick={() => setShowChat(true)}
-              className="group relative inline-flex items-center justify-center gap-3 bg-primary-500 hover:bg-primary-400 text-secondary-900 font-bold text-xl sm:text-2xl px-12 sm:px-16 py-6 sm:py-7 rounded-2xl transition-all transform hover:scale-105 shadow-2xl hover:shadow-primary-500/50 animate-pulse-slow"
+            <Link
+              href="/conectar"
+              className="group relative inline-flex items-center justify-center gap-3 bg-primary-500 hover:bg-primary-400 text-secondary-900 font-bold text-xl sm:text-2xl px-12 sm:px-16 py-6 sm:py-7 rounded-2xl transition-all transform hover:scale-105 shadow-2xl hover:shadow-primary-500/50"
             >
-              <MessageCircle className="w-8 h-8 sm:w-9 sm:h-9" />
-              <span>Habla con un experto GRATIS</span>
-            </button>
-            {/* Badge Online */}
+              <Zap className="w-8 h-8 sm:w-9 sm:h-9" />
+              <span>Conectar con un experto</span>
+              <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7" />
+            </Link>
+            {/* Badge Disponible */}
             <div className="absolute -top-3 -right-3 bg-green-500 text-white text-sm font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-lg">
               <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
               <span className="w-2 h-2 bg-white rounded-full absolute"></span>
-              <span className="ml-2">Online</span>
+              <span className="ml-2">Disponible</span>
             </div>
           </div>
 
@@ -126,9 +126,6 @@ export default function Hero() {
           </div>
         </div>
       </section>
-
-      {/* Chat Modal */}
-      {showChat && <ChatIA onClose={() => setShowChat(false)} />}
     </>
   );
 }

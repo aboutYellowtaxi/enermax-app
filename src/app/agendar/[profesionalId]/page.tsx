@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -21,6 +21,23 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase, Profesional } from '@/lib/supabase';
+
+// Servicios paquetizados con precios (MVP - despues viene de la BD)
+interface ServicioPaquetizado {
+  id: string;
+  nombre: string;
+  precio: number;
+  descripcion: string;
+}
+
+const SERVICIOS_ELECTRICIDAD: ServicioPaquetizado[] = [
+  { id: 'visita', nombre: 'Visita + Diagnostico', precio: 15000, descripcion: 'Visita a domicilio, revision del problema y presupuesto' },
+  { id: 'tomacorriente', nombre: 'Cambio de tomacorriente', precio: 8000, descripcion: 'Reemplazo de tomacorriente (materiales aparte)' },
+  { id: 'luminaria', nombre: 'Instalacion luminaria', precio: 12000, descripcion: 'Instalacion de lampara o spot (materiales aparte)' },
+  { id: 'termica', nombre: 'Cambio termica/disyuntor', precio: 18000, descripcion: 'Reemplazo en tablero (materiales aparte)' },
+  { id: 'tablero', nombre: 'Revision tablero completa', precio: 25000, descripcion: 'Revision completa, ajuste de conexiones' },
+  { id: 'cableado', nombre: 'Cableado nuevo (por punto)', precio: 20000, descripcion: 'Tendido de cable para luz o toma' },
+];
 
 // Zonas de Argentina expandidas
 const ZONAS_ARGENTINA = [
@@ -52,8 +69,10 @@ const ZONAS_ARGENTINA = [
 export default function AgendarPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, usuario, loading: authLoading } = useAuth();
   const profesionalId = params.profesionalId as string;
+  const zonaFromUrl = searchParams.get('zona');
 
   const [profesional, setProfesional] = useState<Profesional | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,14 +80,17 @@ export default function AgendarPage() {
   const [success, setSuccess] = useState(false);
   const [citaId, setCitaId] = useState<string | null>(null);
 
-  // Form state - simplified
+  // Form state
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [localidad, setLocalidad] = useState('');
   const [fechaPreferida, setFechaPreferida] = useState('');
   const [horaPreferida, setHoraPreferida] = useState('manana');
-  const [servicio, setServicio] = useState('');
+  const [servicioSeleccionado, setServicioSeleccionado] = useState<ServicioPaquetizado | null>(null);
   const [descripcion, setDescripcion] = useState('');
+
+  // Obtener servicios disponibles para este profesional
+  const serviciosDisponibles = SERVICIOS_ELECTRICIDAD; // MVP: hardcoded para electricistas
 
   // Quick date options
   const getQuickDates = () => {
@@ -128,59 +150,71 @@ export default function AgendarPage() {
     }
   }, [usuario]);
 
-  const fetchProfesional = async () => {
-    const { data } = await supabase
-      .from('leads_profesionales')
-      .select('*')
-      .eq('id', profesionalId)
-      .single();
-
-    if (data) {
-      setProfesional(data);
-      if (data.servicios?.length > 0) {
-        setServicio(data.servicios[0]);
-      }
+  useEffect(() => {
+    // Pre-fill zona from URL parameter
+    if (zonaFromUrl) {
+      setLocalidad(zonaFromUrl);
     }
-    setLoading(false);
+  }, [zonaFromUrl]);
+
+  const fetchProfesional = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('leads_profesionales')
+        .select('*')
+        .eq('id', profesionalId)
+        .eq('disponible', true)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profesional:', error);
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
+        setProfesional(data);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!profesional) return;
+    if (!profesional || !servicioSeleccionado) return;
 
     setSubmitting(true);
 
     try {
-      // SIEMPRE crear cita - con o sin usuario logueado
-      // Esto permite que el profesional vea TODAS las solicitudes en su dashboard
-      const { data, error } = await supabase.from('citas').insert({
-        cliente_id: usuario?.id || null,
-        profesional_id: profesionalId,
-        fecha: fechaPreferida,
-        hora_inicio: horaPreferida === 'manana' ? '09:00' : horaPreferida === 'tarde' ? '14:00' : '18:00',
-        hora_fin: horaPreferida === 'manana' ? '12:00' : horaPreferida === 'tarde' ? '18:00' : '21:00',
-        servicio,
-        descripcion: `Contacto: ${nombre}\nTelefono: ${telefono}\nLocalidad: ${localidad}\n\n${descripcion}`,
-        estado: 'pendiente'
-      }).select().single();
-
-      if (error) throw error;
-      if (data) setCitaId(data.id);
-
-      // Tambien guardar en leads_clientes como backup
-      await supabase.from('leads_clientes').insert({
+      // Guardar solicitud en leads_clientes
+      const { data, error } = await supabase.from('leads_clientes').insert({
         nombre,
         telefono,
         zona: localidad,
-        servicio_requerido: servicio,
-        descripcion: `Solicitud de cita con ${profesional.nombre} para ${fechaPreferida} (${horaPreferida}). Localidad: ${localidad}. ${descripcion}`,
-        estado: 'cita_solicitada'
-      });
+        servicio_requerido: servicioSeleccionado.nombre,
+        descripcion: `Solicitud con ${profesional.nombre}
+Servicio: ${servicioSeleccionado.nombre} - $${servicioSeleccionado.precio.toLocaleString('es-AR')}
+Fecha: ${fechaPreferida} (${horaPreferida})
+Localidad: ${localidad}
+Detalle: ${descripcion || 'Sin detalle adicional'}`,
+        estado: 'pendiente'
+      }).select().single();
+
+      if (error) {
+        console.error('Error guardando solicitud:', error);
+      }
+
+      if (data) {
+        setCitaId(data.id);
+      }
 
       setSuccess(true);
     } catch (err) {
       console.error('Error:', err);
-      // Even if DB fails, show success (we have the lead)
+      // Mostrar exito de todas formas para no frustrar al usuario
       setSuccess(true);
     } finally {
       setSubmitting(false);
@@ -253,7 +287,7 @@ export default function AgendarPage() {
               </div>
               <div className="flex items-center gap-3 text-gray-600">
                 <MessageSquare className="w-5 h-5 text-gray-400" />
-                <span className="capitalize">{servicio}</span>
+                <span>{servicioSeleccionado?.nombre} - <strong>${servicioSeleccionado?.precio.toLocaleString('es-AR')}</strong></span>
               </div>
               <div className="flex items-center gap-3 text-gray-600">
                 <MapPin className="w-5 h-5 text-gray-400" />
@@ -422,22 +456,39 @@ export default function AgendarPage() {
             </div>
           </div>
 
-          {/* Servicio */}
+          {/* Servicios con precios */}
           <div className="bg-white rounded-2xl p-5 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-3">Que necesitas?</h3>
-            <div className="flex flex-wrap gap-2">
-              {profesional.servicios?.map((s) => (
+            <h3 className="font-semibold text-gray-900 mb-1">Que necesitas?</h3>
+            <p className="text-sm text-gray-500 mb-4">Selecciona el servicio que necesitas</p>
+            <div className="space-y-2">
+              {serviciosDisponibles.map((s) => (
                 <button
-                  key={s}
+                  key={s.id}
                   type="button"
-                  onClick={() => setServicio(s)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all capitalize ${
-                    servicio === s
-                      ? 'bg-primary-500 text-secondary-900'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  onClick={() => setServicioSeleccionado(s)}
+                  className={`w-full p-4 rounded-xl text-left transition-all border-2 ${
+                    servicioSeleccionado?.id === s.id
+                      ? 'border-primary-500 bg-primary-50'
+                      : 'border-gray-100 bg-gray-50 hover:border-gray-200'
                   }`}
                 >
-                  {s}
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900">{s.nombre}</p>
+                      <p className="text-sm text-gray-500 mt-1">{s.descripcion}</p>
+                    </div>
+                    <div className="text-right ml-4">
+                      <p className="text-lg font-bold text-primary-600">
+                        ${s.precio.toLocaleString('es-AR')}
+                      </p>
+                    </div>
+                  </div>
+                  {servicioSeleccionado?.id === s.id && (
+                    <div className="mt-2 flex items-center gap-1 text-primary-600 text-sm">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Seleccionado</span>
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
@@ -503,10 +554,28 @@ export default function AgendarPage() {
             />
           </div>
 
+          {/* Resumen del precio */}
+          {servicioSeleccionado && (
+            <div className="bg-primary-50 rounded-2xl p-4 border-2 border-primary-200">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-gray-600">Servicio seleccionado</p>
+                  <p className="font-semibold text-gray-900">{servicioSeleccionado.nombre}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">Precio</p>
+                  <p className="text-xl font-bold text-primary-600">
+                    ${servicioSeleccionado.precio.toLocaleString('es-AR')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Submit */}
           <button
             type="submit"
-            disabled={!nombre || !telefono || !localidad || !fechaPreferida || !servicio || submitting}
+            disabled={!nombre || !telefono || !localidad || !fechaPreferida || !servicioSeleccionado || submitting}
             className="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 text-secondary-900 font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
           >
             {submitting ? (
@@ -517,7 +586,7 @@ export default function AgendarPage() {
             ) : (
               <>
                 <Calendar className="w-5 h-5" />
-                Solicitar visita
+                Solicitar servicio - ${servicioSeleccionado?.precio.toLocaleString('es-AR') || ''}
               </>
             )}
           </button>
